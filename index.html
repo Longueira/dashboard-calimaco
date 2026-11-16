@@ -561,7 +561,7 @@ function opWindows(vd,name){
 function evAll(){
   if(!EV||!EV.ev)return {};
   const st=dStart(hoy.dia),o={};
-  Object.keys(EV.ev).forEach(n=>{o[n]=(EV.ev[n]||[]).filter(e=>e&&!(e[1]===3&&!e[2]&&!/aceptad/.test(e[3]||''))).map(e=>({t:st+e[0]*1000,k:e[1],a:e[2],al:e[3],m:(EV.mt||[])[e[4]]||'',w:e[5]}))});
+  Object.keys(EV.ev).forEach(n=>{o[n]=(EV.ev[n]||[]).filter(e=>e&&!(e[1]===3&&!e[2]&&!/aceptad/.test(e[3]||''))).map(e=>({t:st+e[0]*1000,k:e[1],a:e[2],al:e[3],m:(EV.mt||[])[e[4]]||'',w:e[5],ac:e[6]}))});
   return o;
 }
 const inMode=e=>e.k!==3&&(opMode==='all'||(opMode==='ret'?e.k===1:e.k!==1));
@@ -636,8 +636,9 @@ function opTimeline(n,A){
   for(let t=t0;t<=hi;t+=step*36e5)s+=`<text x="${x(t)}" y="${Hd-8}" text-anchor="middle">${hhmm(t)}</text>`;
   s+=`<text x="4" y="62">Depós.</text><text x="4" y="98">Retiros</text><text x="${L-6}" y="${cy1+3}" text-anchor="end">100%</text><text x="${L-6}" y="${cy0+3}" text-anchor="end">0%</text></svg>`;
   TL={lo,hi,flo,fhi,L,Wd,Rr,evs:full.filter(e=>e.t>=lo&&e.t<=hi).concat(mk),x};
-  return `<div style="position:relative" id="opTlW">${s}<div id="opTip" class="ctip" style="display:none;top:auto"></div></div><div class="sub" style="margin-top:4px"><span class="g">▌</span>Depósitos &nbsp;<span class="o">▌</span>Retiros aceptados &nbsp;<span style="color:#4cc9f0">▼</span>Marcó como pagado &nbsp;<span class="neg">▌</span>Rechazos &nbsp;<span style="color:#ff8a8a">▒</span>Inactividad (${gapMin}+ min) &nbsp;<span style="color:#4cc9f0">░</span>Turno &nbsp;· Abajo: % acumulado de sus operaciones; la línea punteada es el ritmo uniforme ideal.${outN?` Fuera de este rango: ${outN} operaciones (ver la lista de abajo).`:''}<br><span style="opacity:.7">Rueda: zoom · arrastrar: mover · doble clic: ver todo · pasa el ratón sobre una marca para ver el detalle${tz?` · vista ${hhmm(lo)}–${hhmm(hi)}`:''}</span></div>`;
+  return `<div style="position:relative" id="opTlW">${s}<div id="opTip" class="ctip" style="display:none;top:auto"></div></div><div class="sub" style="margin-top:4px"><span class="g">▌</span>Depósitos &nbsp;<span class="o">▌</span>Retiros (hora de pagado) &nbsp;<span style="color:#4cc9f0">▼</span>Aceptado, sin pagar aún &nbsp;<span class="neg">▌</span>Rechazos &nbsp;<span style="color:#ff8a8a">▒</span>Inactividad (${gapMin}+ min) &nbsp;<span style="color:#4cc9f0">░</span>Turno &nbsp;· Abajo: % acumulado de sus operaciones; la línea punteada es el ritmo uniforme ideal.${outN?` Fuera de este rango: ${outN} operaciones (ver la lista de abajo).`:''}<br><span style="opacity:.7">Rueda: zoom · arrastrar: mover · doble clic: ver todo · pasa el ratón sobre una marca para ver el detalle${tz?` · vista ${hhmm(lo)}–${hhmm(hi)}`:''}</span></div>`;
 }
+const TLs0=()=>dStart(hoy.dia);
 function drawTl(){if(opSel&&curA&&$('opTl'))$('opTl').innerHTML=opTimeline(opSel,curA)}
 function tlZoom(fr,f){
   if(!TL)return;const sp=TL.hi-TL.lo,a=TL.lo+fr*sp,ns=Math.min(TL.fhi-TL.flo,Math.max(6e5,sp*f)),lo=a-fr*ns;
@@ -645,8 +646,8 @@ function tlZoom(fr,f){
 }
 function opList(n,A){
   const rows=[],W=A.W,real=!A.synth;
-  (A.marks||[]).forEach(e=>rows.push({t:e.t,h:`<div class="orow"><span class="mut">${hms(e.t)}</span><span class="chip cf">Pagado</span><b>${esc(e.al||'—')}</b><span class="mut om">${esc(e.m)}</span><span class="a o">${e.a?money(e.a):''}</span><span class="mut ow"></span></div>`}));
-  A.mine.forEach(e=>rows.push({t:e.t,h:`<div class="orow"><span class="mut">${hms(e.t)}</span><span class="chip ${e.k===1?'cr':e.k===2?'cb':'cd'}">${e.k===1?'Retiro':e.k===2?'Rechazado':'Depósito'}</span><b>${esc(e.al||'—')}</b><span class="mut om">${esc(e.m)}</span><span class="a ${e.k===1?'o':e.k===2?'neg':'g'}">${money(e.a)}</span><span class="mut ow">${e.w!=null?'espera '+fT(e.w):''}</span></div>`}));
+  (A.marks||[]).forEach(e=>rows.push({t:e.t,h:`<div class="orow"><span class="mut">${hms(e.t)}</span><span class="chip cf">Aceptado</span><b>${esc(e.al||'—')}</b><span class="mut om">${esc(e.m)}</span><span class="a o">${e.a?money(e.a):''}</span><span class="mut ow"></span></div>`}));
+  A.mine.forEach(e=>rows.push({t:e.t,h:`<div class="orow"><span class="mut">${hms(e.t)}</span><span class="chip ${e.k===1?'cr':e.k===2?'cb':'cd'}">${e.k===1?'Retiro pagado':e.k===2?'Rechazado':'Depósito'}</span><b>${esc(e.al||'—')}</b><span class="mut om">${esc(e.m)}</span><span class="a ${e.k===1?'o':e.k===2?'neg':'g'}">${money(e.a)}</span><span class="mut ow">${e.k===1&&e.ac!=null?'acept. '+hms(dStart(hoy.dia)+e.ac*1000):''}${e.w!=null?' · espera '+fT(e.w):''}</span></div>`}));
   const lab={start:g=>`Sin actividad desde el inicio del turno: ${fT(g.g/1000)} (${hhmm(g.a)} → ${hhmm(g.b)})`,mid:g=>`Inactivo ${fT(g.g/1000)} · ${hhmm(g.a)} → ${hhmm(g.b)}`,end:g=>g.b>=Date.now()-6e4&&isToday()?`Sin actividad desde las ${hhmm(g.a)} (${fT(g.g/1000)})`:`Dejó de operar ${fT(g.g/1000)} antes del fin del turno · ${hhmm(g.a)} → ${hhmm(g.b)}`};
   A.gaps.forEach(g=>rows.push({t:g.a+(g.k==='start'?-1:.5),h:`<div class="orow pz">⏸ ${lab[g.k](g)}</div>`}));
   if(real)for(let i=1;i<A.mine.length;i++){const a=A.mine[i-1].t,b=A.mine[i].t;if(b-a>=gapMin*6e4&&!W.some(w=>a<w.b&&b>w.a))rows.push({t:a+.5,h:`<div class="orow pz off">⏸ Sin actividad ${fT((b-a)/1000)} (fuera de turno) · ${hhmm(a)} → ${hhmm(b)}</div>`})}
@@ -692,7 +693,7 @@ $('mCopy').onclick=()=>{const t=opSel+' · '+$('mSub').textContent+'\n\n'+$('opI
     const cur=$('opCur');
     if(!b||Math.abs(TL.x(b.t)-px)>9){tip.style.display='none';cur.setAttribute('opacity',0);return}
     cur.setAttribute('x1',TL.x(b.t));cur.setAttribute('x2',TL.x(b.t));cur.setAttribute('opacity',.8);
-    tip.innerHTML=`<div class="th">${hms(b.t)} · ${b.k===3?'Marcó como pagado':b.k===1?'Retiro aceptado':b.k===2?'Depósito rechazado':'Depósito'}</div><div class="tr"><span>${b.k===3?'Lote':'Cliente'}</span><b>${esc(b.al||'—')}</b></div><div class="tr"><span>Monto</span><b>${money(b.a)}</b></div><div class="tr"><span>Método</span><span>${esc(b.m)}</span></div>${b.w!=null?`<div class="tr"><span>Esperó</span><span>${fT(b.w)}</span></div>`:''}`;
+    tip.innerHTML=`<div class="th">${hms(b.t)} · ${b.k===3?'Aceptado, sin pagar':b.k===1?'Retiro pagado':b.k===2?'Depósito rechazado':'Depósito'}</div><div class="tr"><span>${b.k===3?'Lote':'Cliente'}</span><b>${esc(b.al||'—')}</b></div><div class="tr"><span>Monto</span><b>${money(b.a)}</b></div><div class="tr"><span>Método</span><span>${esc(b.m)}</span></div>${b.k===1&&b.ac!=null?`<div class="tr"><span>Aceptado a las</span><span>${hms(TLs0()+b.ac*1000)}</span></div>`:''}${b.w!=null?`<div class="tr"><span>Esperó</span><span>${fT(b.w)}</span></div>`:''}`;
     tip.style.display='block';const W=$('opTlW').clientWidth,tw=tip.offsetWidth,l=e.clientX-$('opTlW').getBoundingClientRect().left;
     tip.style.left=Math.max(0,l+16+tw>W?l-tw-16:l+16)+'px';tip.style.bottom='6px';
   });
