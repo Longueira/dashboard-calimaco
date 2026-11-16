@@ -556,7 +556,7 @@ function opWindows(vd,name){
 function evAll(){
   if(!EV||!EV.ev)return {};
   const st=dStart(hoy.dia),o={};
-  Object.keys(EV.ev).forEach(n=>{o[n]=(EV.ev[n]||[]).filter(Boolean).map(e=>({t:st+e[0]*1000,k:e[1],a:e[2],al:e[3],m:(EV.mt||[])[e[4]]||'',w:e[5]}))});
+  Object.keys(EV.ev).forEach(n=>{o[n]=(EV.ev[n]||[]).filter(e=>e&&!(e[1]===3&&!e[2]&&!/aceptad/.test(e[3]||''))).map(e=>({t:st+e[0]*1000,k:e[1],a:e[2],al:e[3],m:(EV.mt||[])[e[4]]||'',w:e[5]}))});
   return o;
 }
 const inMode=e=>e.k!==3&&(opMode==='all'||(opMode==='ret'?e.k===1:e.k!==1));
