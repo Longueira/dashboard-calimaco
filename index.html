@@ -222,7 +222,7 @@ function tickClock(){
   const n=new Date();$('clock').textContent=new Intl.DateTimeFormat('es-DO',{timeZone:'America/Santo_Domingo',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(n)+' RD';
   $('fecha').textContent=new Intl.DateTimeFormat('es-DO',{timeZone:'UTC',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(viewDate()+'T12:00:00Z'))+(isToday()?'':' · día anterior');$('dSel').value=viewDate();$('dSel').max=rdDate(Date.now());$('dNext').disabled=isToday();
   const age=estado?(Date.now()-estado.ts)/1000:1e9,d=$('dRec');
-  if(estado&&estado.ok&&age<120){d.className='dot ok';$('tRec').textContent='Recolector activo · '+ago(estado.ts)+(estado.bf>0?' · cargando histórico (faltan '+estado.bf+' días)':'')}
+  if(estado&&estado.ok&&age<120){d.className='dot ok';$('tRec').textContent='Recolector activo · '+ago(estado.ts)+' · web r8 / colector '+(estado.ver||'antiguo')+(estado.bf>0?' · cargando histórico (faltan '+estado.bf+' días)':'')}
   else if(estado&&age<120){d.className='dot warn';$('tRec').textContent='Recolector con error'}
   else{d.className='dot bad';$('tRec').textContent=estado?'Sin señal del recolector · '+ago(estado.ts):'Esperando datos…'}
   const re=$('recErr'),msg=estado?[estado.err&&'Error: '+estado.err,estado.bfErr&&'Histórico: '+estado.bfErr].filter(Boolean).join(' · '):'';re.textContent=msg;re.style.display=msg?'block':'none';
