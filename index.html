@@ -260,12 +260,12 @@ function shift(){
   const r=blocks.length?S.onShift(blocks,now):{has:false,list:[]};
   const sched={};r.list.forEach(x=>sched[cap(x.name)]=x);
   const names=new Set(Object.keys(sched));
-  Object.keys(ops).forEach(n=>{const o=ops[n];if(Math.max(o.ld,o.lp)&&now-Math.max(o.ld,o.lp)<act)names.add(n)});
+  Object.keys(ops).forEach(n=>{const o=ops[n];if(Math.max(o.ld,o.lp,o.la||0)&&now-Math.max(o.ld,o.lp,o.la||0)<act)names.add(n)});
   $('shSub').textContent=(blocks.length?(r.has?'según horario + actividad real':'hoy no aparece en el horario'):'cargando horario…')+' · clic en un operador para ver su día';
   if(!names.size){$('shift').innerHTML='<div class="empty">Nadie en turno según el horario y sin actividad reciente.</div>';return}
   $('shift').innerHTML=[...names].map(n=>{
     const o=ops[n]||{dn:0,da:0,pn:0,pa:0,ld:0,lp:0},sc=sched[n];
-    const dep=o.ld&&now-o.ld<act,ret=o.lp&&now-o.lp<act,last=Math.max(o.ld,o.lp);
+    const dep=o.ld&&now-o.ld<act,ret=(o.lp&&now-o.lp<act)||(o.la&&now-o.la<act),last=Math.max(o.ld,o.lp,o.la||0);
     const chips=[dep?'<span class="chip cd">Depósitos</span>':'',ret?'<span class="chip cr">Retiros</span>':'',(!dep&&!ret)?'<span class="chip ci">Inactivo</span>':'',!sc?'<span class="chip cb">Fuera de horario</span>':''].join('');
     return `<div class="op clk" data-op="${esc(n)}" title="Ver la actividad del día de ${esc(n)}"><div class="top"><span class="nm">${esc(n)}</span><span class="chips">${chips}</span></div>
     <div class="hr">${sc?'Turno '+mm(sc.s)+' – '+mm(sc.e):'Sin turno asignado ahora'}</div>
