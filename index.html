@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pagos en vivo</title>
+<style>
+:root{--bg:#0b0f14;--panel:#121923;--panel2:#18212d;--line:#243040;--tx:#e6edf5;--mut:#8a9bb0;--ok:#2ecc71;--ret:#f5a524;--bad:#ff5d5d;--acc:#4cc9f0;--r:12px}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1500px;margin:0 auto;padding:14px 16px 40px}
+header{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;margin-bottom:14px}
+h1{margin:0;font-size:20px;font-weight:700;letter-spacing:.2px;white-space:nowrap}
+.sub{color:var(--mut);font-size:12px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:12px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--mut);display:inline-block}.dot.ok{background:var(--ok);box-shadow:0 0 8px var(--ok)}.dot.bad{background:var(--bad)}.dot.warn{background:var(--ret)}
+.grid{display:grid;gap:12px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(215px,1fr));margin-bottom:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;min-width:0}
+.card h2{margin:0 0 10px;font-size:13px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.kpi .v{font-size:26px;font-weight:700;white-space:nowrap}.kpi .s{color:var(--mut);font-size:12px;margin-top:3px;white-space:nowrap}
+.kpi.d .v{color:var(--ok)}.kpi.r .v{color:var(--ret)}
+.delta{font-size:12px;font-weight:600;white-space:nowrap}.up{color:var(--ok)}.down{color:var(--bad)}
+.row2{grid-template-columns:1.55fr 1fr}.row3{grid-template-columns:2fr 1fr}
+@media(max-width:1000px){.row2,.row3{grid-template-columns:1fr}}
+.shift{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.op{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.op .top{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;justify-content:space-between}
+.op .nm{font-weight:700;font-size:15px;white-space:nowrap}
+.chip{display:inline-flex;align-items:center;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:700;white-space:nowrap}
+.cd{background:rgba(46,204,113,.15);color:var(--ok)}.cr{background:rgba(245,165,36,.16);color:var(--ret)}.ci{background:rgba(138,155,176,.15);color:var(--mut)}.cb{background:rgba(255,93,93,.16);color:var(--bad)}.cf{background:rgba(76,201,240,.14);color:var(--acc)}
+.chips{display:flex;gap:5px;flex-wrap:nowrap}
+.op .hr{color:var(--mut);font-size:12px;margin:3px 0 8px;white-space:nowrap}
+.op .st{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;white-space:nowrap}
+.op .st b{font-size:14px}
+.op .la{color:var(--mut);font-size:11.5px;margin-top:6px;white-space:nowrap}
+table{width:100%;border-collapse:collapse}th,td{padding:6px 7px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap;font-size:13px}
+th{color:var(--mut);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px}
+th:first-child,td:first-child{text-align:left}#rank th:nth-child(2),#rank td:nth-child(2){text-align:left}tr:last-child td{border-bottom:0}
+.scroll{overflow-x:auto}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}.tab{background:var(--panel2);border:1px solid var(--line);color:var(--mut);border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer;white-space:nowrap}.tab.on{color:var(--tx);border-color:var(--acc);background:#10303a}
+.bar{height:6px;border-radius:4px;background:var(--line);overflow:hidden;display:flex;min-width:70px}.bar i{display:block;height:100%}
+.mrow{display:grid;grid-template-columns:165px minmax(60px,1fr) max-content;gap:10px;align-items:center;padding:5px 0;font-size:13px}
+.mrow span:last-child{text-align:right;white-space:nowrap}.mrow span:first-child{white-space:nowrap}
+.feed{max-height:430px;overflow:auto}
+.fe{display:flex;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);font-size:12.5px;white-space:nowrap;flex-wrap:nowrap}
+.fe:last-child{border-bottom:0}.fe .t{color:var(--mut);width:46px}.fe .a{margin-left:auto;font-weight:700}
+.alert{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--ret);border-radius:8px;padding:8px 10px;margin-bottom:8px}
+.alert.h{border-left-color:var(--bad)}
+.alert .l1{display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:nowrap;white-space:nowrap}
+.alert .l2{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.btn{background:var(--panel2);border:1px solid var(--line);color:var(--tx);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px}.btn:hover{border-color:var(--acc)}
+.mut{color:var(--mut)}.g{color:var(--ok)}.o{color:var(--ret)}.neg{color:var(--bad)}
+#gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:9;text-align:center;padding:20px}
+#gate .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px 30px;max-width:420px}
+.thr{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center;font-size:12.5px;margin-top:8px}
+.thr input{width:90px;background:var(--bg);border:1px solid var(--line);color:var(--tx);border-radius:6px;padding:4px 6px;text-align:right}
+svg text{fill:var(--mut);font-size:10px}
+.empty{color:var(--mut);padding:10px 0;font-size:13px}
+</style>
+</head>
+<body>
+<div id="gate"><div class="box"><h1>Pagos en vivo</h1><p class="mut" id="gmsg">Acceso privado.</p><button class="btn" id="login" style="display:none">Entrar con Google</button></div></div>
+<div class="wrap" id="app" style="display:none">
+  <header>
+    <div><h1>Pagos en vivo · SuperBets</h1><div class="sub" id="fecha"></div></div>
+    <div class="pills">
+      <span class="pill"><span class="dot" id="dRec"></span><span id="tRec">Recolector…</span></span>
+      <span class="pill" id="clock">--:--:--</span>
+      <button class="btn" id="bSalir">Salir</button>
+    </div>
+  </header>
+
+  <div class="grid kpis" id="kpis"></div>
+
+  <div class="card" style="margin-bottom:12px"><h2>En turno ahora <span class="sub" id="shSub"></span></h2><div class="shift" id="shift"></div></div>
+
+  <div class="grid row3" style="margin-bottom:12px">
+    <div class="card"><h2>Actividad por hora (RD) <span class="tabs"><span class="tab on" data-m="n">Cantidad</span><span class="tab" data-m="a">Monto</span></span></h2><div id="chart"></div></div>
+    <div class="card"><h2>Canales de depósito</h2><div id="canales"></div><h2 style="margin-top:14px">Por método</h2><div id="metodos"></div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px"><h2>Rendimiento por operador (hoy)</h2><div class="scroll"><table id="opsT"></table></div></div>
+
+  <div class="grid row2" style="margin-bottom:12px">
+    <div class="card"><h2>Ranking de clientes <span class="tabs" id="rkTabs"><span class="tab on" data-r="da">Depósitos $</span><span class="tab" data-r="dn">Depósitos #</span><span class="tab" data-r="pa">Retiros $</span><span class="tab" data-r="pn">Retiros #</span></span></h2><div class="scroll"><table id="rank"></table></div></div>
+    <div class="card"><h2>Alertas de vigilancia <button class="btn" id="bThr">Umbrales</button></h2><div id="thr" style="display:none"></div><div id="alerts"></div></div>
+  </div>
+
+  <div class="card"><h2>Actividad reciente</h2><div class="feed" id="feed"></div></div>
+</div>
+
+<script src="config.js"></script>
+<script src="schedule.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+(function(){
+const CFG=window.PD,S=window.PD_SCHED,$=id=>document.getElementById(id);
+const RDF=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Santo_Domingo'});
+const rdDate=ms=>RDF.format(new Date(ms));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>'RD$ '+Math.round(n||0).toLocaleString('es-DO');
+const num=n=>Math.round(n||0).toLocaleString('es-DO');
+const hhmm=ms=>new Intl.DateTimeFormat('es-DO',{timeZone:'America/Santo_Domingo',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(ms));
+const mm=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+const ago=ms=>{if(!ms)return '—';const s=Math.max(0,(Date.now()-ms)/1000);return s<90?'hace '+Math.round(s)+' s':s<5400?'hace '+Math.round(s/60)+' min':'hace '+(s/3600).toFixed(1)+' h'};
+const cap=s=>s.charAt(0)+s.slice(1).toLowerCase();
+
+let hoy=null,ayer=null,estado=null,blocks=[],chartMode='n',rankMode='da';
+const THR_DEF={depN:15,depAmt:300000,payN:5,payAmt:300000,netNeg:100000,methods:4};
+let THR=Object.assign({},THR_DEF,JSON.parse(localStorage.getItem('pd_thr')||'{}'));
+
+/* ---------- datos ---------- */
+function start(){
+  $('gate').style.display='none';$('app').style.display='block';
+  if(location.search.includes('test')){
+    fetch('test-data.json').then(r=>r.json()).then(d=>{hoy=d.hoy;ayer=d.ayer;estado={ts:Date.now(),ok:true};render()});
+  }else{
+    const db=firebase.database(),today=rdDate(Date.now());
+    let cur=today;
+    const sub=()=>{cur=rdDate(Date.now());db.ref('dashboard/dias/'+cur).on('value',s=>{hoy=s.val();render()},denied);
+      db.ref('dashboard/dias/'+rdDate(Date.now()-864e5)).on('value',s=>{ayer=s.val();render()})};
+    sub();
+    db.ref('dashboard/estado').on('value',s=>{estado=s.val();render()},denied);
+    setInterval(()=>{if(rdDate(Date.now())!==cur){db.ref().off();sub();db.ref('dashboard/estado').on('value',s=>{estado=s.val();render()})}},30000);
+  }
+  loadSchedule();setInterval(loadSchedule,5*60000);
+  setInterval(tickClock,1000);tickClock();
+}
+function denied(e){if(e&&/permission/i.test(e.message||e.code)){firebase.auth().signOut();$('app').style.display='none';$('gate').style.display='flex';$('gmsg').textContent='Esta cuenta no tiene acceso.';$('login').style.display='inline-block'}}
+function loadSchedule(){
+  fetch(CFG.scheduleCsv,{cache:'no-store'}).then(r=>r.text()).then(t=>{blocks=S.parseBlocks(t);render()}).catch(()=>{});
+}
+function tickClock(){
+  const n=new Date();$('clock').textContent=new Intl.DateTimeFormat('es-DO',{timeZone:'America/Santo_Domingo',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(n)+' RD';
+  $('fecha').textContent=new Intl.DateTimeFormat('es-DO',{timeZone:'America/Santo_Domingo',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(n);
+  const age=estado?(Date.now()-estado.ts)/1000:1e9,d=$('dRec');
+  if(estado&&estado.ok&&age<120){d.className='dot ok';$('tRec').textContent='Recolector activo · '+ago(estado.ts)}
+  else if(estado&&age<120){d.className='dot warn';$('tRec').textContent='Recolector con error'}
+  else{d.className='dot bad';$('tRec').textContent=estado?'Sin señal del recolector · '+ago(estado.ts):'Esperando datos…'}
+}
+
+/* ---------- render ---------- */
+function cumTo(a,h){let s=0;for(let i=0;i<h;i++)s+=a[i];return s}
+function delta(cur,prev){if(!prev)return '';const p=(cur-prev)/prev*100;return `<span class="delta ${p>=0?'up':'down'}">${p>=0?'▲':'▼'} ${Math.abs(p).toFixed(0)}% vs ayer</span>`}
+function render(){
+  if(!hoy){$('kpis').innerHTML='<div class="card"><div class="empty">Esperando datos del recolector…</div></div>';return}
+  const [yy,mo,dd]=hoy.dia.split('-').map(Number),h=Math.min(23,Math.max(0,Math.floor((Date.now()-Date.UTC(yy,mo-1,dd,4))/36e5)));
+  kpis(h);shift();chart(h);canales();ops();rank();alerts();feed();
+}
+function kpis(h){
+  const d=hoy.dep,p=hoy.pay,hy=ayer?ayer.hrs:null;
+  const dPrev=hy?cumTo(hy.da,h):0,pPrev=hy?cumTo(hy.pa,h):0,dCur=cumTo(hoy.hrs.da,h),pCur=cumTo(hoy.hrs.pa,h);
+  const net=d.amt-p.amt;
+  $('kpis').innerHTML=`
+  <div class="card kpi d"><h2>Depósitos acreditados</h2><div class="v">${num(d.n)}</div><div class="s">${money(d.amt)} · ${delta(dCur,dPrev)}</div></div>
+  <div class="card kpi r"><h2>Retiros pagados</h2><div class="v">${num(p.n)}</div><div class="s">${money(p.amt)} · ${delta(pCur,pPrev)}</div></div>
+  <div class="card kpi"><h2>Balance del día</h2><div class="v ${net<0?'neg':'g'}">${net<0?'−':''}${money(Math.abs(net))}</div><div class="s">depósitos − retiros</div></div>
+  <div class="card kpi"><h2>Depósitos manuales</h2><div class="v">${num(d.manual.n)}</div><div class="s">${money(d.manual.amt)} · ${d.n?Math.round(d.manual.n/d.n*100):0}% del total</div></div>
+  <div class="card kpi"><h2>Pendientes / denegados</h2><div class="v">${num(d.pend)} <span class="mut" style="font-size:16px">/ ${num(d.den)}</span></div><div class="s">depósitos NEW / DENIED hoy</div></div>
+  <div class="card kpi"><h2>Clientes activos</h2><div class="v">${num(hoy.totalClientes)}</div><div class="s">con movimiento hoy</div></div>`;
+}
+function shift(){
+  const now=Date.now(),act=CFG.activeMinutes*60000,ops=hoy.ops||{};
+  const r=blocks.length?S.onShift(blocks,now):{has:false,list:[]};
+  const sched={};r.list.forEach(x=>sched[cap(x.name)]=x);
+  const names=new Set(Object.keys(sched));
+  Object.keys(ops).forEach(n=>{const o=ops[n];if(Math.max(o.ld,o.lp)&&now-Math.max(o.ld,o.lp)<act)names.add(n)});
+  $('shSub').textContent=blocks.length?(r.has?'según horario + actividad real':'hoy no aparece en el horario'):'cargando horario…';
+  if(!names.size){$('shift').innerHTML='<div class="empty">Nadie en turno según el horario y sin actividad reciente.</div>';return}
+  $('shift').innerHTML=[...names].map(n=>{
+    const o=ops[n]||{dn:0,da:0,pn:0,pa:0,ld:0,lp:0},sc=sched[n];
+    const dep=o.ld&&now-o.ld<act,ret=o.lp&&now-o.lp<act,last=Math.max(o.ld,o.lp);
+    const chips=[dep?'<span class="chip cd">Depósitos</span>':'',ret?'<span class="chip cr">Retiros</span>':'',(!dep&&!ret)?'<span class="chip ci">Inactivo</span>':'',!sc?'<span class="chip cb">Fuera de horario</span>':''].join('');
+    return `<div class="op"><div class="top"><span class="nm">${esc(n)}</span><span class="chips">${chips}</span></div>
+    <div class="hr">${sc?'Turno '+mm(sc.s)+' – '+mm(sc.e):'Sin turno asignado ahora'}</div>
+    <div class="st"><span>Depósitos <b class="g">${num(o.dn)}</b></span><span class="mut">${money(o.da)}</span></div>
+    <div class="st"><span>Retiros <b class="o">${num(o.pn)}</b></span><span class="mut">${money(o.pa)}</span></div>
+    <div class="la">Última actividad: ${ago(last)}</div></div>`}).join('');
+}
+function chart(h){
+  const m=chartMode,W=860,H=230,L=44,B=22,T=10,bw=(W-L)/24;
+  const dn=hoy.hrs[m==='n'?'dn':'da'],pn=hoy.hrs[m==='n'?'pn':'pa'],yd=ayer?ayer.hrs[m==='n'?'dn':'da']:null,yp=ayer?ayer.hrs[m==='n'?'pn':'pa']:null;
+  const mx=Math.max(1,...dn,...pn,...(yd||[0]),...(yp||[0])),y=v=>H-B-(H-B-T)*v/mx;
+  const fmt=v=>m==='n'?num(v):(v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?Math.round(v/1e3)+'k':num(v));
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">`;
+  for(let i=0;i<=4;i++){const v=mx*i/4;s+=`<line x1="${L}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="#243040" stroke-width="1"/><text x="${L-6}" y="${y(v)+3}" text-anchor="end">${fmt(v)}</text>`}
+  for(let i=0;i<24;i++){
+    const x=L+i*bw,fut=i>h;
+    s+=`<rect x="${x+bw*.12}" y="${y(dn[i])}" width="${bw*.38}" height="${H-B-y(dn[i])}" fill="#2ecc71" opacity="${fut?.25:1}" rx="2"><title>${String(i).padStart(2,'0')}:00 · depósitos ${m==='n'?num(dn[i]):money(dn[i])}</title></rect>`;
+    s+=`<rect x="${x+bw*.5}" y="${y(pn[i])}" width="${bw*.38}" height="${H-B-y(pn[i])}" fill="#f5a524" opacity="${fut?.25:1}" rx="2"><title>${String(i).padStart(2,'0')}:00 · retiros ${m==='n'?num(pn[i]):money(pn[i])}</title></rect>`;
+    s+=`<text x="${x+bw/2}" y="${H-6}" text-anchor="middle">${String(i).padStart(2,'0')}</text>`;
+  }
+  if(yd){const pts=a=>a.map((v,i)=>`${L+i*bw+bw/2},${y(v)}`).join(' ');
+    s+=`<polyline points="${pts(yd)}" fill="none" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/><polyline points="${pts(yp)}" fill="none" stroke="#f5a524" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/>`}
+  s+='</svg><div class="sub" style="margin-top:4px"><span class="g">■</span> Depósitos &nbsp; <span class="o">■</span> Retiros &nbsp; <span class="mut">- - - ayer</span></div>';
+  $('chart').innerHTML=s;
+}
+function canales(){
+  const d=hoy.dep,t=d.amt||1,row=(n,c,col)=>`<div class="mrow"><span>${n}</span><div class="bar"><i style="width:${c.amt/t*100}%;background:${col}"></i></div><span>${num(c.n)} · ${money(c.amt)}</span></div>`;
+  $('canales').innerHTML=row('Manual',d.manual,'#2ecc71')+row('Automático',d.auto,'#4cc9f0')+row('Punto Físico',d.fisico,'#b388ff');
+  const rows=(o,col)=>Object.entries(o).sort((a,b)=>b[1].amt-a[1].amt).map(([k,v])=>{const T=Object.values(o).reduce((s,x)=>s+x.amt,0)||1;return `<div class="mrow"><span>${esc(k||'—')}</span><div class="bar"><i style="width:${v.amt/T*100}%;background:${col}"></i></div><span>${num(v.n)} · ${money(v.amt)}</span></div>`}).join('');
+  $('metodos').innerHTML='<div class="sub" style="margin-bottom:2px">Depósitos</div>'+rows(hoy.dep.byM,'#2ecc71')+'<div class="sub" style="margin:8px 0 2px">Retiros</div>'+rows(hoy.pay.byM,'#f5a524');
+}
+function ops(){
+  const o=hoy.ops||{},ks=Object.keys(o).sort((a,b)=>(o[b].dn+o[b].pn)-(o[a].dn+o[a].pn));
+  $('opsT').innerHTML='<tr><th>Operador</th><th>Depósitos</th><th>Monto dep.</th><th>Retiros</th><th>Monto ret.</th><th>Total ops</th><th>Primera</th><th>Última</th></tr>'+
+  (ks.map(k=>{const v=o[k],f=Math.min(...[v.fd,v.fp].filter(Boolean)),l=Math.max(v.ld,v.lp);return `<tr><td><b>${esc(k)}</b></td><td class="g">${num(v.dn)}</td><td>${money(v.da)}</td><td class="o">${num(v.pn)}</td><td>${money(v.pa)}</td><td><b>${num(v.dn+v.pn)}</b></td><td class="mut">${isFinite(f)?hhmm(f):'—'}</td><td class="mut">${l?hhmm(l):'—'}</td></tr>`}).join('')||'<tr><td colspan="8" class="empty">Sin actividad todavía.</td></tr>');
+}
+const C={al:0,u:1,dn:2,da:3,dm:4,dau:5,df:6,pn:7,pa:8,ms:9,lt:10,mx:11};
+function rank(){
+  const k={da:3,dn:2,pa:8,pn:7}[rankMode],list=hoy.cli.slice().sort((a,b)=>b[k]-a[k]).filter(c=>c[k]>0).slice(0,20);
+  $('rank').innerHTML='<tr><th>#</th><th>Cliente</th><th>Dep. #</th><th>Dep. $</th><th>Man/Aut/Fís</th><th>Ret. #</th><th>Ret. $</th><th>Neto</th><th>Último</th></tr>'+
+  list.map((c,i)=>{const net=c[3]-c[8];return `<tr><td>${i+1}</td><td><b>${esc(c[0])}</b></td><td>${num(c[2])}</td><td class="g">${money(c[3])}</td><td class="mut">${c[4]}/${c[5]}/${c[6]}</td><td>${num(c[7])}</td><td class="o">${money(c[8])}</td><td class="${net<0?'neg':''}">${net<0?'−':''}${money(Math.abs(net))}</td><td class="mut">${c[10]?hhmm(c[10]):'—'}</td></tr>`}).join('')||'<tr><td colspan="9" class="empty">Sin datos.</td></tr>';
+}
+function alerts(){
+  const out=[];
+  hoy.cli.forEach(c=>{
+    const r=[];
+    if(c[2]>=THR.depN)r.push(`${c[2]} depósitos`);
+    if(c[3]>=THR.depAmt)r.push(`${money(c[3])} depositados`);
+    if(c[7]>=THR.payN)r.push(`${c[7]} retiros`);
+    if(c[8]>=THR.payAmt)r.push(`${money(c[8])} retirados`);
+    if(c[8]-c[3]>=THR.netNeg&&c[7]>0)r.push(`retiró ${money(c[8]-c[3])} más de lo depositado`);
+    if(c[9]>=THR.methods)r.push(`${c[9]} métodos distintos`);
+    if(r.length)out.push({c,r});
+  });
+  out.sort((a,b)=>b.r.length-a.r.length||b.c[3]-a.c[3]);
+  $('alerts').innerHTML=out.slice(0,15).map(({c,r})=>`<div class="alert ${r.length>=3?'h':''}"><div class="l1"><b>${esc(c[0])}</b><span class="mut">Dep ${num(c[2])} · ${money(c[3])} &nbsp; Ret ${num(c[7])} · ${money(c[8])}</span></div><div class="l2">${r.map(x=>`<span class="chip ${r.length>=3?'cb':'cr'}">${esc(x)}</span>`).join('')}</div></div>`).join('')||'<div class="empty">Sin alertas con los umbrales actuales.</div>';
+}
+function feed(){
+  $('feed').innerHTML=(hoy.feed||[]).map(e=>`<div class="fe"><span class="t">${hhmm(e.t)}</span><span class="chip ${e.k==='d'?'cd':'cr'}">${e.k==='d'?'Depósito':'Retiro'}</span><b>${esc(e.al||'—')}</b><span class="mut">${esc(e.m)}</span><span class="chip cf">${esc(e.o)}</span><span class="a ${e.k==='d'?'g':'o'}">${money(e.a)}</span></div>`).join('')||'<div class="empty">Sin movimientos.</div>';
+}
+
+/* ---------- UI ---------- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('.tab');if(!t)return;
+  t.parentNode.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
+  if(t.dataset.m){chartMode=t.dataset.m}if(t.dataset.r){rankMode=t.dataset.r}render();
+});
+$('bThr').onclick=()=>{
+  const b=$('thr');if(b.style.display==='block'){b.style.display='none';return}
+  const L={depN:'Depósitos en el día ≥',depAmt:'Monto depositado ≥ (RD$)',payN:'Retiros en el día ≥',payAmt:'Monto retirado ≥ (RD$)',netNeg:'Retiró más de lo depositado ≥ (RD$)',methods:'Métodos distintos ≥'};
+  b.innerHTML='<div class="thr">'+Object.keys(L).map(k=>`<span>${L[k]}</span><input data-k="${k}" type="number" value="${THR[k]}">`).join('')+'</div><div style="margin:8px 0 12px"><button class="btn" id="thrOk">Guardar</button></div>';
+  b.style.display='block';
+  $('thrOk').onclick=()=>{b.querySelectorAll('input').forEach(i=>THR[i.dataset.k]=Number(i.value)||0);localStorage.setItem('pd_thr',JSON.stringify(THR));b.style.display='none';render()};
+};
+
+/* ---------- acceso ---------- */
+if(location.search.includes('test')){start()}
+else{
+  if(/PEGA_AQUI/.test(JSON.stringify(CFG.firebase))){$('gmsg').textContent='Falta pegar la configuración de Firebase en config.js.'}
+  else{
+    firebase.initializeApp(CFG.firebase);
+    const ok=u=>!!u;
+    $('login').onclick=()=>firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>{$('gmsg').textContent='No se pudo iniciar sesión: '+e.message});
+    $('bSalir').onclick=()=>firebase.auth().signOut().then(()=>location.reload());
+    firebase.auth().onAuthStateChanged(u=>{
+      if(!u){$('gate').style.display='flex';$('app').style.display='none';$('login').style.display='inline-block';return}
+      if(!ok(u)){$('gmsg').textContent='Esta cuenta no tiene acceso.';$('login').style.display='inline-block';firebase.auth().signOut();return}
+      start();
+    });
+  }
+}
+})();
+</script>
+</body>
+</html>
