@@ -559,7 +559,7 @@ function evAll(){
   Object.keys(EV.ev).forEach(n=>{o[n]=(EV.ev[n]||[]).filter(Boolean).map(e=>({t:st+e[0]*1000,k:e[1],a:e[2],al:e[3],m:(EV.mt||[])[e[4]]||'',w:e[5]}))});
   return o;
 }
-const inMode=e=>opMode==='all'||(opMode==='ret'?e.k===1:e.k!==1);
+const inMode=e=>e.k!==3&&(opMode==='all'||(opMode==='ret'?e.k===1:e.k!==1));
 function opAnalyze(n){
   const all=evAll(),mineAll=all[n]||[],mine=mineAll.filter(inMode),vd=hoy.dia,td=isToday(),now=Date.now(),G=gapMin*60000;
   let W=opWindows(vd,n);const synth=!(W&&W.length);
@@ -568,9 +568,10 @@ function opAnalyze(n){
   const I=[],add=(sev,t,x)=>I.push({sev,t,x}),gaps=[];let idle=0,shiftMs=0;
   const pre=w=>W.length>1&&!w.syn?'Turno '+hhmm(w.a)+'–'+hhmm(w.b)+': ':'';
   if(synth)add('info','Sin turno asignado en el horario',mine.length?`Se analiza su actividad real (${hhmm(mine[0].t)}–${hhmm(mine[mine.length-1].t)}), sin compararla con un turno.`:'No hay actividad registrada.');
+  const marks=opMode==='dep'?[]:mineAll.filter(e=>e.k===3),act=mine.concat(marks).sort((a,b)=>a.t-b.t);
   W.forEach(w=>{
     const fin=!td||now>=w.b,b2=td?Math.min(w.b,now):w.b;if(b2<=w.a)return;
-    const E=mine.filter(e=>e.t>=w.a&&e.t<w.b),pts=[w.a,...E.map(e=>e.t),b2],wg=[];let wi=0;
+    const E=act.filter(e=>e.t>=w.a&&e.t<w.b),pts=[w.a,...E.map(e=>e.t),b2],wg=[];let wi=0;
     for(let i=0;i<pts.length-1;i++){const g=pts[i+1]-pts[i];if(g>=G){wi+=g;wg.push({a:pts[i],b:pts[i+1],g,k:i===0&&!w.syn?'start':i===pts.length-2&&!w.syn?'end':'mid'})}}
     idle+=wi;shiftMs+=b2-w.a;gaps.push(...wg);
     const pct=Math.round(wi/(b2-w.a)*100),p=pre(w);
@@ -597,7 +598,7 @@ function opAnalyze(n){
     }
   });
   if(!synth){const out=mine.filter(e=>!W.some(w=>e.t>=w.a-18e5&&e.t<w.b+18e5));if(out.length)add('info','Actividad fuera de turno',`${out.length} operaciones fuera de su franja (entre ${hhmm(out[0].t)} y ${hhmm(out[out.length-1].t)}).`)}
-  return {mine,mineAll,W,gaps,idle,shiftMs,I,synth,hasW};
+  return {mine,marks,mineAll,W,gaps,idle,shiftMs,I,synth,hasW};
 }
 let tz=null,curA=null;
 function opTimeline(n,A){
@@ -619,7 +620,9 @@ function opTimeline(n,A){
   for(let t=t0;t<=hi;t+=step*36e5)s+=`<line x1="${x(t)}" x2="${x(t)}" y1="22" y2="${Hd-24}" stroke="#243040"/>`;
   const col={0:'#2ecc71',1:'#f5a524',2:'#ff5d5d'},yy={0:[46,70],1:[78,104],2:[46,70]},sw=spanH<3?2.2:spanH<8?1.8:1.5;
   full.forEach(e=>{if(e.t<lo||e.t>hi)return;const y=yy[e.k];s+=`<line x1="${x(e.t)}" x2="${x(e.t)}" y1="${y[0]}" y2="${y[1]}" stroke="${col[e.k]}" stroke-width="${sw}" opacity=".9"/>`});
-  const cy0=Hd-26,cy1=118,cl=(arr,c)=>{if(arr.length<3)return '';let k=0,p=`${x(arr[0].t-1)},${cy0} `;arr.forEach(e=>{k++;p+=`${x(e.t)},${cy0-(cy0-cy1)*k/arr.length} `});return `<polyline points="${p}" fill="none" stroke="${c}" stroke-width="2"/>`};
+  const mk=(A.marks||[]).filter(e=>e.t>=lo&&e.t<=hi);
+  mk.forEach(e=>{s+=`<path d="M${x(e.t)-5},108 L${x(e.t)+5},108 L${x(e.t)},116 Z" fill="#4cc9f0"/><line x1="${x(e.t)}" x2="${x(e.t)}" y1="80" y2="108" stroke="#4cc9f0" stroke-dasharray="2 2" opacity=".55"/>`});
+  const cy0=Hd-26,cy1=124,cl=(arr,c)=>{if(arr.length<3)return '';let k=0,p=`${x(arr[0].t-1)},${cy0} `;arr.forEach(e=>{k++;p+=`${x(e.t)},${cy0-(cy0-cy1)*k/arr.length} `});return `<polyline points="${p}" fill="none" stroke="${c}" stroke-width="2"/>`};
   const wa=wins.length?Math.max(flo,wins[0].a):flo,wb=wins.length?Math.min(fhi,wins[wins.length-1].b):fhi;
   s+=`<line x1="${x(wa)}" y1="${cy0}" x2="${x(wb)}" y2="${cy1}" stroke="#8a9bb0" stroke-dasharray="4 4" opacity=".6"/>`;
   if(opMode!=='dep')s+=cl(full.filter(e=>e.k===1),'#f5a524');
@@ -627,8 +630,8 @@ function opTimeline(n,A){
   s+=`<line id="opCur" x1="0" x2="0" y1="6" y2="${Hd-24}" stroke="#4cc9f0" opacity="0"/></g>`;
   for(let t=t0;t<=hi;t+=step*36e5)s+=`<text x="${x(t)}" y="${Hd-8}" text-anchor="middle">${hhmm(t)}</text>`;
   s+=`<text x="4" y="62">Depós.</text><text x="4" y="98">Retiros</text><text x="${L-6}" y="${cy1+3}" text-anchor="end">100%</text><text x="${L-6}" y="${cy0+3}" text-anchor="end">0%</text></svg>`;
-  TL={lo,hi,flo,fhi,L,Wd,Rr,evs:full.filter(e=>e.t>=lo&&e.t<=hi),x};
-  return `<div style="position:relative" id="opTlW">${s}<div id="opTip" class="ctip" style="display:none;top:auto"></div></div><div class="sub" style="margin-top:4px"><span class="g">▌</span>Depósitos &nbsp;<span class="o">▌</span>Retiros &nbsp;<span class="neg">▌</span>Rechazos &nbsp;<span style="color:#ff8a8a">▒</span>Inactividad (${gapMin}+ min) &nbsp;<span style="color:#4cc9f0">░</span>Turno &nbsp;· Abajo: % acumulado de sus operaciones; la línea punteada es el ritmo uniforme ideal.${outN?` Fuera de este rango: ${outN} operaciones (ver la lista de abajo).`:''}<br><span style="opacity:.7">Rueda: zoom · arrastrar: mover · doble clic: ver todo · pasa el ratón sobre una marca para ver el detalle${tz?` · vista ${hhmm(lo)}–${hhmm(hi)}`:''}</span></div>`;
+  TL={lo,hi,flo,fhi,L,Wd,Rr,evs:full.filter(e=>e.t>=lo&&e.t<=hi).concat(mk),x};
+  return `<div style="position:relative" id="opTlW">${s}<div id="opTip" class="ctip" style="display:none;top:auto"></div></div><div class="sub" style="margin-top:4px"><span class="g">▌</span>Depósitos &nbsp;<span class="o">▌</span>Retiros aceptados &nbsp;<span style="color:#4cc9f0">▼</span>Marcó como pagado &nbsp;<span class="neg">▌</span>Rechazos &nbsp;<span style="color:#ff8a8a">▒</span>Inactividad (${gapMin}+ min) &nbsp;<span style="color:#4cc9f0">░</span>Turno &nbsp;· Abajo: % acumulado de sus operaciones; la línea punteada es el ritmo uniforme ideal.${outN?` Fuera de este rango: ${outN} operaciones (ver la lista de abajo).`:''}<br><span style="opacity:.7">Rueda: zoom · arrastrar: mover · doble clic: ver todo · pasa el ratón sobre una marca para ver el detalle${tz?` · vista ${hhmm(lo)}–${hhmm(hi)}`:''}</span></div>`;
 }
 function drawTl(){if(opSel&&curA&&$('opTl'))$('opTl').innerHTML=opTimeline(opSel,curA)}
 function tlZoom(fr,f){
@@ -637,6 +640,7 @@ function tlZoom(fr,f){
 }
 function opList(n,A){
   const rows=[],W=A.W,real=!A.synth;
+  (A.marks||[]).forEach(e=>rows.push({t:e.t,h:`<div class="orow"><span class="mut">${hms(e.t)}</span><span class="chip cf">Pagado</span><b>${esc(e.al||'—')}</b><span class="mut om">${esc(e.m)}</span><span class="a o">${e.a?money(e.a):''}</span><span class="mut ow"></span></div>`}));
   A.mine.forEach(e=>rows.push({t:e.t,h:`<div class="orow"><span class="mut">${hms(e.t)}</span><span class="chip ${e.k===1?'cr':e.k===2?'cb':'cd'}">${e.k===1?'Retiro':e.k===2?'Rechazado':'Depósito'}</span><b>${esc(e.al||'—')}</b><span class="mut om">${esc(e.m)}</span><span class="a ${e.k===1?'o':e.k===2?'neg':'g'}">${money(e.a)}</span><span class="mut ow">${e.w!=null?'espera '+fT(e.w):''}</span></div>`}));
   const lab={start:g=>`Sin actividad desde el inicio del turno: ${fT(g.g/1000)} (${hhmm(g.a)} → ${hhmm(g.b)})`,mid:g=>`Inactivo ${fT(g.g/1000)} · ${hhmm(g.a)} → ${hhmm(g.b)}`,end:g=>g.b>=Date.now()-6e4&&isToday()?`Sin actividad desde las ${hhmm(g.a)} (${fT(g.g/1000)})`:`Dejó de operar ${fT(g.g/1000)} antes del fin del turno · ${hhmm(g.a)} → ${hhmm(g.b)}`};
   A.gaps.forEach(g=>rows.push({t:g.a+(g.k==='start'?-1:.5),h:`<div class="orow pz">⏸ ${lab[g.k](g)}</div>`}));
@@ -683,7 +687,7 @@ $('mCopy').onclick=()=>{const t=opSel+' · '+$('mSub').textContent+'\n\n'+$('opI
     const cur=$('opCur');
     if(!b||Math.abs(TL.x(b.t)-px)>9){tip.style.display='none';cur.setAttribute('opacity',0);return}
     cur.setAttribute('x1',TL.x(b.t));cur.setAttribute('x2',TL.x(b.t));cur.setAttribute('opacity',.8);
-    tip.innerHTML=`<div class="th">${hms(b.t)} · ${b.k===1?'Retiro':b.k===2?'Depósito rechazado':'Depósito'}</div><div class="tr"><span>Cliente</span><b>${esc(b.al||'—')}</b></div><div class="tr"><span>Monto</span><b>${money(b.a)}</b></div><div class="tr"><span>Método</span><span>${esc(b.m)}</span></div>${b.w!=null?`<div class="tr"><span>Esperó</span><span>${fT(b.w)}</span></div>`:''}`;
+    tip.innerHTML=`<div class="th">${hms(b.t)} · ${b.k===3?'Marcó como pagado':b.k===1?'Retiro aceptado':b.k===2?'Depósito rechazado':'Depósito'}</div><div class="tr"><span>${b.k===3?'Lote':'Cliente'}</span><b>${esc(b.al||'—')}</b></div><div class="tr"><span>Monto</span><b>${money(b.a)}</b></div><div class="tr"><span>Método</span><span>${esc(b.m)}</span></div>${b.w!=null?`<div class="tr"><span>Esperó</span><span>${fT(b.w)}</span></div>`:''}`;
     tip.style.display='block';const W=$('opTlW').clientWidth,tw=tip.offsetWidth,l=e.clientX-$('opTlW').getBoundingClientRect().left;
     tip.style.left=Math.max(0,l+16+tw>W?l-tw-16:l+16)+'px';tip.style.bottom='6px';
   });
