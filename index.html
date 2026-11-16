@@ -55,8 +55,40 @@ th:first-child,td:first-child{text-align:left}#rank th:nth-child(2),#rank td:nth
 #gate .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px 30px;max-width:420px}
 .thr{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center;font-size:12.5px;margin-top:8px}
 .thr input{width:90px;background:var(--bg);border:1px solid var(--line);color:var(--tx);border-radius:6px;padding:4px 6px;text-align:right}
+#dnav{padding:3px 6px;gap:4px}.nb{background:var(--panel2);border:1px solid var(--line);color:var(--tx);border-radius:7px;padding:3px 9px;cursor:pointer;font-size:12px}.nb:hover{border-color:var(--acc)}.nb:disabled{opacity:.35;cursor:default}#dSel{background:var(--panel2);border:1px solid var(--line);color:var(--tx);border-radius:7px;padding:3px 6px;font-size:12px;color-scheme:dark}
 svg text{fill:var(--mut);font-size:10px}
+.zb{background:var(--panel2);border:1px solid var(--line);color:var(--tx);border-radius:8px;padding:4px 9px;font-size:12px;cursor:pointer;white-space:nowrap;user-select:none}.zb:hover{border-color:var(--acc)}
+.ctip{position:absolute;top:6px;background:#0e151e;border:1px solid var(--acc);border-radius:8px;padding:8px 10px;font-size:12px;pointer-events:none;z-index:5;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+.ctip .th{font-weight:700;margin-bottom:5px;color:var(--acc)}.ctip .tr{display:flex;justify-content:space-between;gap:16px;padding:1px 0}.ctip .tr span:first-child{color:var(--mut)}.ctip .sep{border-top:1px solid var(--line);margin:5px 0}
+.lg{cursor:pointer;margin-right:14px;user-select:none;white-space:nowrap}.lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}.lg.off{opacity:.35}
 .empty{color:var(--mut);padding:10px 0;font-size:13px}
+#bInf{border-color:var(--acc);color:var(--acc)}
+#informe{display:none}
+.inf h3{margin:18px 0 8px;font-size:13px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.6px}
+.inf h3:first-child{margin-top:0}
+.ig{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media(max-width:1100px){.ig{grid-template-columns:1fr}}
+.igc>.tt{font-size:12px;font-weight:700;margin-bottom:6px;white-space:nowrap}
+.ib{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--mut);border-radius:8px;padding:8px 10px;margin-bottom:8px}
+.ib.ok{border-left-color:var(--ok)}.ib.warn{border-left-color:var(--ret)}.ib.bad{border-left-color:var(--bad)}.ib.info{border-left-color:var(--acc)}
+.ib b{display:block;font-size:13px;margin-bottom:2px}.ib span{color:var(--mut);font-size:12.5px;line-height:1.4}
+.hm td,.hm th{padding:4px 5px;text-align:center;font-size:12px}.hm td:first-child,.hm th:first-child{text-align:left;position:sticky;left:0;background:var(--panel)}
+.two>div>h3{margin-top:18px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:1000px){.two{grid-template-columns:1fr}}
+.infh{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.infh .tt{font-size:18px;font-weight:700}
+.kv td:first-child,.kv th:first-child{text-align:left}
+@media print{
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ html,body{background:#fff!important;color:#111!important}
+ header,#panel,.noprint,#gate{display:none!important}
+ .wrap{max-width:none;padding:0}#app{display:block!important}#informe{display:block!important}
+ .card,.ib,.op{background:#fff!important;border-color:#bbb!important;color:#111!important}
+ th,.mut,.sub,.ib span,.card h2,.inf h3{color:#444!important}
+ .g,.up{color:#0a7a3a!important}.o{color:#a96300!important}.neg,.down{color:#b00020!important}
+ .hm td:first-child,.hm th:first-child{background:#fff}
+ .card,.ib{break-inside:avoid}svg text{fill:#444}
+}
 </style>
 </head>
 <body>
@@ -66,17 +98,20 @@ svg text{fill:var(--mut);font-size:10px}
     <div><h1>Pagos en vivo · SuperBets</h1><div class="sub" id="fecha"></div></div>
     <div class="pills">
       <span class="pill"><span class="dot" id="dRec"></span><span id="tRec">Recolector…</span></span>
+      <span class="pill" id="dnav"><button class="nb" id="dPrev" title="Día anterior">◀</button><input type="date" id="dSel"><button class="nb" id="dNext" title="Día siguiente">▶</button><button class="nb" id="dHoy">Hoy</button></span>
+      <button class="btn" id="bInf">Informe del día</button>
       <span class="pill" id="clock">--:--:--</span>
       <button class="btn" id="bSalir">Salir</button>
     </div>
   </header>
 
+  <div id="panel">
   <div class="grid kpis" id="kpis"></div>
 
-  <div class="card" style="margin-bottom:12px"><h2>En turno ahora <span class="sub" id="shSub"></span></h2><div class="shift" id="shift"></div></div>
+  <div class="card" style="margin-bottom:12px"><h2><span id="shT">En turno ahora</span> <span class="sub" id="shSub"></span></h2><div class="shift" id="shift"></div></div>
 
   <div class="grid row3" style="margin-bottom:12px">
-    <div class="card"><h2>Actividad por hora (RD) <span class="tabs"><span class="tab on" data-m="n">Cantidad</span><span class="tab" data-m="a">Monto</span></span></h2><div id="chart"></div></div>
+    <div class="card"><h2>Actividad por hora (RD) <span class="tabs"><span class="tab on" data-m="n">Cantidad</span><span class="tab" data-m="a">Monto</span><span class="tab" data-m="c">Acumulado</span><span class="zb" id="zIn" title="Acercar">＋</span><span class="zb" id="zOut" title="Alejar">－</span><span class="zb" id="zRst" title="Ver todo el día">Todo</span></span></h2><div id="chart"></div></div>
     <div class="card"><h2>Canales de depósito</h2><div id="canales"></div><h2 style="margin-top:14px">Por método</h2><div id="metodos"></div></div>
   </div>
 
@@ -88,6 +123,8 @@ svg text{fill:var(--mut);font-size:10px}
   </div>
 
   <div class="card"><h2>Actividad reciente</h2><div class="feed" id="feed"></div></div>
+  </div>
+  <div id="informe" class="inf"><div class="card"><div class="infh"><div class="tt" id="infT">Informe del día</div><div class="noprint" style="display:flex;gap:8px"><button class="btn" id="bCopy">Copiar</button><button class="btn" id="bPrint">Imprimir / PDF</button></div></div><div id="infBody"></div></div></div>
 </div>
 
 <script src="config.js"></script>
@@ -108,7 +145,8 @@ const mm=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2
 const ago=ms=>{if(!ms)return '—';const s=Math.max(0,(Date.now()-ms)/1000);return s<90?'hace '+Math.round(s)+' s':s<5400?'hace '+Math.round(s/60)+' min':'hace '+(s/3600).toFixed(1)+' h'};
 const cap=s=>s.charAt(0)+s.slice(1).toLowerCase();
 
-let hoy=null,ayer=null,estado=null,blocks=[],chartMode='n',rankMode='da';
+let view='panel',H7={},H7ts={},hist=()=>{},hoy=null,ayer=null,estado=null,blocks=[],chartMode='n',rankMode='da',sel=null,subscribe=()=>{};
+const viewDate=()=>sel||rdDate(Date.now()),isToday=()=>!sel;
 const THR_DEF={depN:15,depAmt:300000,payN:5,payAmt:300000,netNeg:100000,methods:4};
 let THR=Object.assign({},THR_DEF,JSON.parse(localStorage.getItem('pd_thr')||'{}'));
 
@@ -116,15 +154,21 @@ let THR=Object.assign({},THR_DEF,JSON.parse(localStorage.getItem('pd_thr')||'{}'
 function start(){
   $('gate').style.display='none';$('app').style.display='block';
   if(location.search.includes('test')){
-    fetch('test-data.json').then(r=>r.json()).then(d=>{hoy=d.hoy;ayer=d.ayer;estado={ts:Date.now(),ok:true};render()});
+    fetch('test-data.json').then(r=>r.json()).then(d=>{hoy=d.hoy;ayer=d.ayer;H7=d.hist||{};if(location.search.includes('past'))sel=d.hoy.dia;estado={ts:Date.now(),ok:true};if(location.search.includes('informe'))view='informe';render()});
   }else{
-    const db=firebase.database(),today=rdDate(Date.now());
-    let cur=today;
-    const sub=()=>{cur=rdDate(Date.now());db.ref('dashboard/dias/'+cur).on('value',s=>{hoy=s.val();render()},denied);
-      db.ref('dashboard/dias/'+rdDate(Date.now()-864e5)).on('value',s=>{ayer=s.val();render()})};
-    sub();
-    db.ref('dashboard/estado').on('value',s=>{estado=s.val();render()},denied);
-    setInterval(()=>{if(rdDate(Date.now())!==cur){db.ref().off();sub();db.ref('dashboard/estado').on('value',s=>{estado=s.val();render()})}},30000);
+    const db=firebase.database();let refs=[];
+    subscribe=()=>{
+      refs.forEach(r=>r.off());hoy=null;ayer=null;
+      const d=viewDate(),p=new Date(Date.parse(d+'T12:00:00Z')-864e5).toISOString().slice(0,10);
+      const r1=db.ref('dashboard/dias/'+d),r2=db.ref('dashboard/dias/'+p),r3=db.ref('dashboard/estado');
+      r1.on('value',s=>{hoy=s.val();render()},denied);r2.on('value',s=>{ayer=s.val();render()},denied);r3.on('value',s=>{estado=s.val();render()},denied);
+      refs=[r1,r2,r3];hist();
+    };
+    hist=()=>{const d=viewDate();for(let i=1;i<=7;i++){const ds=dayStr(d,-i);if(H7[ds]!==undefined&&Date.now()-(H7ts[ds]||0)<20*60000)continue;H7ts[ds]=Date.now();db.ref('dashboard/dias/'+ds).once('value').then(s=>{H7[ds]=s.val();if(view==='informe')render()},()=>{})}};
+    subscribe();
+    let cur=rdDate(Date.now());
+    setInterval(()=>{if(view==='informe')hist()},10*60000);
+    setInterval(()=>{if(rdDate(Date.now())!==cur){const wasToday=!sel;cur=rdDate(Date.now());if(wasToday)subscribe()}},30000);
   }
   loadSchedule();setInterval(loadSchedule,5*60000);
   setInterval(tickClock,1000);tickClock();
@@ -135,7 +179,7 @@ function loadSchedule(){
 }
 function tickClock(){
   const n=new Date();$('clock').textContent=new Intl.DateTimeFormat('es-DO',{timeZone:'America/Santo_Domingo',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(n)+' RD';
-  $('fecha').textContent=new Intl.DateTimeFormat('es-DO',{timeZone:'America/Santo_Domingo',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(n);
+  $('fecha').textContent=new Intl.DateTimeFormat('es-DO',{timeZone:'UTC',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(viewDate()+'T12:00:00Z'))+(isToday()?'':' · día anterior');$('dSel').value=viewDate();$('dSel').max=rdDate(Date.now());$('dNext').disabled=isToday();
   const age=estado?(Date.now()-estado.ts)/1000:1e9,d=$('dRec');
   if(estado&&estado.ok&&age<120){d.className='dot ok';$('tRec').textContent='Recolector activo · '+ago(estado.ts)}
   else if(estado&&age<120){d.className='dot warn';$('tRec').textContent='Recolector con error'}
@@ -146,10 +190,14 @@ function tickClock(){
 function cumTo(a,h){let s=0;for(let i=0;i<h;i++)s+=a[i];return s}
 function delta(cur,prev){if(!prev)return '';const p=(cur-prev)/prev*100;return `<span class="delta ${p>=0?'up':'down'}">${p>=0?'▲':'▼'} ${Math.abs(p).toFixed(0)}% vs ayer</span>`}
 function render(){
-  if(!hoy){$('kpis').innerHTML='<div class="card"><div class="empty">Esperando datos del recolector…</div></div>';return}
-  const [yy,mo,dd]=hoy.dia.split('-').map(Number),h=Math.min(23,Math.max(0,Math.floor((Date.now()-Date.UTC(yy,mo-1,dd,4))/36e5)));
+  $('panel').style.display=view==='panel'?'block':'none';$('informe').style.display=view==='informe'?'block':'none';$('bInf').textContent=view==='informe'?'Volver al panel':'Informe del día';
+  const msg='<div class="empty">'+(isToday()?'Esperando datos del recolector…':'No hay datos guardados para este día (el recolector guarda hasta 45 días atrás).')+'</div>';
+  if(!hoy){['shift','chart','canales','metodos','opsT','rank','alerts','feed'].forEach(k=>$(k).innerHTML='');$('kpis').innerHTML='<div class="card">'+msg+'</div>';$('infBody').innerHTML=msg;return}
+  if(view==='informe'){report();return}
+  const h=curH();
   kpis(h);shift();chart(h);canales();ops();rank();alerts();feed();
 }
+function curH(){const [yy,mo,dd]=hoy.dia.split('-').map(Number);return isToday()?Math.min(23,Math.max(0,Math.floor((Date.now()-Date.UTC(yy,mo-1,dd,4))/36e5))):24}
 function kpis(h){
   const d=hoy.dep,p=hoy.pay,hy=ayer?ayer.hrs:null;
   const dPrev=hy?cumTo(hy.da,h):0,pPrev=hy?cumTo(hy.pa,h):0,dCur=cumTo(hoy.hrs.da,h),pCur=cumTo(hoy.hrs.pa,h);
@@ -163,6 +211,8 @@ function kpis(h){
   <div class="card kpi"><h2>Clientes activos</h2><div class="v">${num(hoy.totalClientes)}</div><div class="s">con movimiento hoy</div></div>`;
 }
 function shift(){
+  $('shT').textContent='En turno ahora';
+  if(!isToday())return shiftPast();
   const now=Date.now(),act=CFG.activeMinutes*60000,ops=hoy.ops||{};
   const r=blocks.length?S.onShift(blocks,now):{has:false,list:[]};
   const sched={};r.list.forEach(x=>sched[cap(x.name)]=x);
@@ -180,23 +230,83 @@ function shift(){
     <div class="st"><span>Retiros <b class="o">${num(o.pn)}</b></span><span class="mut">${money(o.pa)}</span></div>
     <div class="la">Última actividad: ${ago(last)}</div></div>`}).join('');
 }
+function shiftPast(){
+  $('shT').textContent='Turnos del día';
+  const ops=hoy.ops||{},sc={};
+  (blocks.length?(S.intervals(blocks,hoy.dia)||[]):[]).forEach(x=>{(sc[cap(x.name)]=sc[cap(x.name)]||[]).push(mm(x.s)+' – '+mm(x.e))});
+  const names=new Set([...Object.keys(sc),...Object.keys(ops)]);
+  $('shSub').textContent='turnos del día según horario + actividad registrada';
+  $('shift').innerHTML=[...names].map(n=>{const o=ops[n]||{dn:0,da:0,pn:0,pa:0};
+    return `<div class="op"><div class="top"><span class="nm">${esc(n)}</span><span class="chips">${sc[n]?'':'<span class="chip cb">Fuera de horario</span>'}</span></div>
+    <div class="hr">${sc[n]?'Turno '+sc[n].join(' · '):'Sin turno en el horario'}</div>
+    <div class="st"><span>Depósitos <b class="g">${num(o.dn)}</b></span><span class="mut">${money(o.da)}</span></div>
+    <div class="st"><span>Retiros <b class="o">${num(o.pn)}</b></span><span class="mut">${money(o.pa)}</span></div></div>`}).join('')||'<div class="empty">Sin turnos ni actividad registrada.</div>';
+}
+let cv={lo:0,hi:24},hid={},hoverI=null,CG=null,chH=24,lastPx=0,drag=null;
+function chSeries(){
+  const m=chartMode,k=m==='n'?['dn','pn']:['da','pa'],cu=a=>{let t=0;return a.map(v=>t+=v)};
+  let dep=hoy.hrs[k[0]],pay=hoy.hrs[k[1]],yd=ayer?ayer.hrs[k[0]]:null,yp=ayer?ayer.hrs[k[1]]:null;
+  if(m==='c'){dep=cu(hoy.hrs.da);pay=cu(hoy.hrs.pa);yd=ayer?cu(ayer.hrs.da):null;yp=ayer?cu(ayer.hrs.pa):null}
+  return {dep,pay,yd,yp,money:m!=='n',cum:m==='c'};
+}
 function chart(h){
-  const m=chartMode,W=860,H=230,L=44,B=22,T=10,bw=(W-L)/24;
-  const dn=hoy.hrs[m==='n'?'dn':'da'],pn=hoy.hrs[m==='n'?'pn':'pa'],yd=ayer?ayer.hrs[m==='n'?'dn':'da']:null,yp=ayer?ayer.hrs[m==='n'?'pn':'pa']:null;
-  const mx=Math.max(1,...dn,...pn,...(yd||[0]),...(yp||[0])),y=v=>H-B-(H-B-T)*v/mx;
-  const fmt=v=>m==='n'?num(v):(v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?Math.round(v/1e3)+'k':num(v));
-  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">`;
-  for(let i=0;i<=4;i++){const v=mx*i/4;s+=`<line x1="${L}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="#243040" stroke-width="1"/><text x="${L-6}" y="${y(v)+3}" text-anchor="end">${fmt(v)}</text>`}
-  for(let i=0;i<24;i++){
-    const x=L+i*bw,fut=i>h;
-    s+=`<rect x="${x+bw*.12}" y="${y(dn[i])}" width="${bw*.38}" height="${H-B-y(dn[i])}" fill="#2ecc71" opacity="${fut?.25:1}" rx="2"><title>${String(i).padStart(2,'0')}:00 · depósitos ${m==='n'?num(dn[i]):money(dn[i])}</title></rect>`;
-    s+=`<rect x="${x+bw*.5}" y="${y(pn[i])}" width="${bw*.38}" height="${H-B-y(pn[i])}" fill="#f5a524" opacity="${fut?.25:1}" rx="2"><title>${String(i).padStart(2,'0')}:00 · retiros ${m==='n'?num(pn[i]):money(pn[i])}</title></rect>`;
-    s+=`<text x="${x+bw/2}" y="${H-6}" text-anchor="middle">${String(i).padStart(2,'0')}</text>`;
+  chH=h;
+  if(!$('chS'))$('chart').innerHTML='<div id="chW" style="position:relative"><div id="chS" style="touch-action:pan-y;user-select:none;cursor:crosshair"></div><div id="chTip" class="ctip" style="display:none"></div></div><div class="sub" id="chLeg" style="margin-top:6px"></div><div class="sub" style="margin-top:2px;opacity:.7">Rueda: zoom · arrastrar: mover · doble clic: ver todo · pasa el ratón para ver el detalle</div>';
+  const S=chSeries(),W=860,H=250,L=50,B=22,T=10,PR=8,span=cv.hi-cv.lo,bw=(W-L-PR)/span,x=i=>L+(i-cv.lo)*bw,i0=Math.floor(cv.lo),i1=Math.min(23,Math.ceil(cv.hi)-1);
+  const last=isToday()?h:23,vis=[];
+  for(let i=i0;i<=i1;i++){if(!hid.d&&(!S.cum||i<=last))vis.push(S.dep[i]);if(!hid.p&&(!S.cum||i<=last))vis.push(S.pay[i]);if(!hid.y&&S.yd){vis.push(S.yd[i]);vis.push(S.yp[i])}}
+  const mx=Math.max(1,...vis)*1.05,y=v=>H-B-(H-B-T)*v/mx;
+  const fmt=v=>S.money?(v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?Math.round(v/1e3)+'k':num(v)):num(v);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block"><defs><clipPath id="chC"><rect x="${L}" y="0" width="${W-L-PR}" height="${H}"/></clipPath></defs>`;
+  for(let i=0;i<=4;i++){const v=mx*i/4;s+=`<line x1="${L}" x2="${W-PR}" y1="${y(v)}" y2="${y(v)}" stroke="#243040" stroke-width="1"/><text x="${L-6}" y="${y(v)+3}" text-anchor="end">${fmt(v)}</text>`}
+  s+='<g clip-path="url(#chC)"><rect id="chBand" x="0" y="0" width="0" height="0" fill="#4cc9f0" opacity=".10"/>';
+  const lab=span<=10?(i=>hh(i)):(i=>String(i).padStart(2,'0'));
+  for(let i=i0;i<=i1;i++){
+    const xi=x(i),fut=isToday()&&i>h;
+    if(!S.cum){
+      if(!hid.d)s+=`<rect x="${xi+bw*.12}" y="${y(S.dep[i])}" width="${bw*.38}" height="${H-B-y(S.dep[i])}" fill="#2ecc71" opacity="${fut?.25:1}" rx="2"/>`;
+      if(!hid.p)s+=`<rect x="${xi+bw*.5}" y="${y(S.pay[i])}" width="${bw*.38}" height="${H-B-y(S.pay[i])}" fill="#f5a524" opacity="${fut?.25:1}" rx="2"/>`;
+    }
+    s+=`<text x="${xi+bw/2}" y="${H-6}" text-anchor="middle">${lab(i)}</text>`;
   }
-  if(yd){const pts=a=>a.map((v,i)=>`${L+i*bw+bw/2},${y(v)}`).join(' ');
-    s+=`<polyline points="${pts(yd)}" fill="none" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/><polyline points="${pts(yp)}" fill="none" stroke="#f5a524" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/>`}
-  s+='</svg><div class="sub" style="margin-top:4px"><span class="g">■</span> Depósitos &nbsp; <span class="o">■</span> Retiros &nbsp; <span class="mut">- - - ayer</span></div>';
-  $('chart').innerHTML=s;
+  const pts=(a,n)=>a.slice(0,n+1).map((v,i)=>`${x(i)+bw/2},${y(v)}`).join(' ');
+  if(S.yd&&!hid.y)s+=`<polyline points="${pts(S.yd,23)}" fill="none" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="4 3" opacity=".6"/><polyline points="${pts(S.yp,23)}" fill="none" stroke="#f5a524" stroke-width="1.5" stroke-dasharray="4 3" opacity=".6"/>`;
+  if(S.cum){
+    if(!hid.d)s+=`<polyline points="${pts(S.dep,last)}" fill="none" stroke="#2ecc71" stroke-width="2.2"/>`;
+    if(!hid.p)s+=`<polyline points="${pts(S.pay,last)}" fill="none" stroke="#f5a524" stroke-width="2.2"/>`;
+  }
+  s+='</g></svg>';
+  $('chS').innerHTML=s;
+  $('chLeg').innerHTML=`<span class="lg ${hid.d?'off':''}" data-s="d"><i style="background:#2ecc71"></i>Depósitos</span><span class="lg ${hid.p?'off':''}" data-s="p"><i style="background:#f5a524"></i>Retiros</span>${S.yd?`<span class="lg ${hid.y?'off':''}" data-s="y"><i style="background:repeating-linear-gradient(90deg,#8a9bb0 0 4px,transparent 4px 7px)"></i>Día anterior</span>`:''}<span class="mut">&nbsp; ${span<24?`vista ${hh(Math.floor(cv.lo))}–${hh(Math.ceil(cv.hi))}`:'día completo'}</span>`;
+  CG={W,H,L,B,T,PR,bw,S,h};
+  if(hoverI!=null)tip(hoverI);
+}
+function tip(i){
+  const t=$('chTip'),S=CG.S;
+  if(i<0||i>23||i<cv.lo-1||i>cv.hi){t.style.display='none';return}
+  const band=$('chBand');if(band){band.setAttribute('x',CG.L+(i-cv.lo)*CG.bw);band.setAttribute('width',CG.bw);band.setAttribute('y',CG.T);band.setAttribute('height',CG.H-CG.B-CG.T)}
+  const hr=hoy.hrs,yh=ayer&&ayer.hrs,row=(a,b)=>`<div class="tr"><span>${a}</span><span>${b}</span></div>`;
+  const dl=(c,r)=>r?` <span class="${c>=r?'up':'down'}">${c>=r?'▲':'▼'}${Math.abs(Math.round((c-r)/r*100))}%</span>`:'';
+  let o=`<div class="th">${hh(i)} – ${String(i).padStart(2,'0')}:59</div>`;
+  if(isToday()&&i>CG.h){o+='<div class="mut">Esta hora aún no ha llegado.</div>'}
+  else if(S.cum){
+    const cd=S.dep[i],cp=S.pay[i];
+    o+=row('Depósitos acumulados',`<b class="g">${money(cd)}</b>`)+row('Retiros acumulados',`<b class="o">${money(cp)}</b>`)+row('Balance acumulado',`<b class="${cd-cp<0?'neg':''}">${cd-cp<0?'−':''}${money(Math.abs(cd-cp))}</b>`);
+    if(S.yd&&!hid.y)o+='<div class="sep"></div>'+row('Ayer a esa hora',`${money(S.yd[i])} / ${money(S.yp[i])}`)+row('Dep. vs ayer',dl(cd,S.yd[i])||'—')+row('Ret. vs ayer',dl(cp,S.yp[i])||'—');
+  }else{
+    o+=row('Depósitos',`<b class="g">${num(hr.dn[i])}</b> · ${money(hr.da[i])}${yh?dl(S.money?hr.da[i]:hr.dn[i],S.money?yh.da[i]:yh.dn[i]):''}`)+row('Retiros',`<b class="o">${num(hr.pn[i])}</b> · ${money(hr.pa[i])}${yh?dl(S.money?hr.pa[i]:hr.pn[i],S.money?yh.pa[i]:yh.pn[i]):''}`);
+    const b=hr.da[i]-hr.pa[i];o+=row('Balance de la hora',`<b class="${b<0?'neg':''}">${b<0?'−':''}${money(Math.abs(b))}</b>`);
+    if(yh)o+='<div class="sep"></div>'+row('Ayer',`${num(yh.dn[i])} dep · ${num(yh.pn[i])} ret`);
+    if(hr.dm)o+=row('Manual / Auto / Físico',`${hr.dm[i]} / ${hr.dau[i]} / ${hr.df[i]}`);
+    if(hr.den&&(hr.den[i]||hr.pen[i]))o+=row('Denegados / Pendientes',`<span class="neg">${hr.den[i]}</span> / <span class="o">${hr.pen[i]}</span>`);
+    const w=Object.entries(hoy.ops||{}).filter(([n,v])=>v.h&&v.h[i]>0).sort((a,b)=>b[1].h[i]-a[1].h[i]);
+    if(w.length)o+='<div class="sep"></div>'+row('Operadores',w.map(([n,v])=>`${esc(n)} ${v.h[i]}`).join(' · '));
+  }
+  t.innerHTML=o;t.style.display='block';
+  const W=$('chW').clientWidth,tw=t.offsetWidth;let l=lastPx+16;if(l+tw>W)l=lastPx-tw-16;t.style.left=Math.max(0,l)+'px';
+}
+function zoomBy(fr,f){
+  const span=cv.hi-cv.lo,a=cv.lo+fr*span,ns=Math.min(24,Math.max(4,span*f));let lo=a-fr*ns;lo=Math.max(0,Math.min(24-ns,lo));cv={lo,hi:lo+ns};chart(chH);
 }
 function canales(){
   const d=hoy.dep,t=d.amt||1,row=(n,c,col)=>`<div class="mrow"><span>${n}</span><div class="bar"><i style="width:${c.amt/t*100}%;background:${col}"></i></div><span>${num(c.n)} · ${money(c.amt)}</span></div>`;
@@ -216,6 +326,33 @@ function rank(){
   list.map((c,i)=>{const net=c[3]-c[8];return `<tr><td>${i+1}</td><td><b>${esc(c[0])}</b></td><td>${num(c[2])}</td><td class="g">${money(c[3])}</td><td class="mut">${c[4]}/${c[5]}/${c[6]}</td><td>${num(c[7])}</td><td class="o">${money(c[8])}</td><td class="${net<0?'neg':''}">${net<0?'−':''}${money(Math.abs(net))}</td><td class="mut">${c[10]?hhmm(c[10]):'—'}</td></tr>`}).join('')||'<tr><td colspan="9" class="empty">Sin datos.</td></tr>';
 }
 function alerts(){
+  const out=flagged();
+  $('alerts').innerHTML=out.slice(0,15).map(({c,r})=>`<div class="alert ${r.length>=3?'h':''}"><div class="l1"><b>${esc(c[0])}</b><span class="mut">Dep ${num(c[2])} · ${money(c[3])} &nbsp; Ret ${num(c[7])} · ${money(c[8])}</span></div><div class="l2">${r.map(x=>`<span class="chip ${r.length>=3?'cb':'cr'}">${esc(x)}</span>`).join('')}</div></div>`).join('')||'<div class="empty">Sin alertas con los umbrales actuales.</div>';
+}
+function feed(){
+  $('feed').innerHTML=(hoy.feed||[]).map(e=>`<div class="fe"><span class="t">${hhmm(e.t)}</span><span class="chip ${e.k==='d'?'cd':'cr'}">${e.k==='d'?'Depósito':'Retiro'}</span><b>${esc(e.al||'—')}</b><span class="mut">${esc(e.m)}</span><span class="chip cf">${esc(e.o)}</span><span class="a ${e.k==='d'?'g':'o'}">${money(e.a)}</span></div>`).join('')||'<div class="empty">Sin movimientos.</div>';
+}
+
+/* ---------- INFORME DEL DÍA ---------- */
+const dayStr=(d,n)=>new Date(Date.parse(d+'T12:00:00Z')+n*864e5).toISOString().slice(0,10);
+const fP=v=>v==null||!isFinite(v)?'—':v.toFixed(1)+'%';
+const fN=v=>v==null||!isFinite(v)?'—':num(v);
+const fM=v=>v==null||!isFinite(v)?'—':(v<0?'−':'')+money(Math.abs(v));
+const fT=s=>{s=Math.round(s);if(s<90)return s+' s';const m=Math.round(s/60);return m<90?m+' min':Math.floor(m/60)+' h '+String(m%60).padStart(2,'0')+' min'};
+const hh=i=>String(i).padStart(2,'0')+':00';
+const sum=a=>a.reduce((s,v)=>s+v,0);
+function dcell(cur,ref,dir,pp){
+  if(cur==null||ref==null||!isFinite(cur)||!isFinite(ref))return '<span class="mut">—</span>';
+  let diff,txt;
+  if(pp){diff=cur-ref;txt=(diff>=0?'+':'−')+Math.abs(diff).toFixed(1)+' pp'}
+  else{if(Math.abs(ref)<1e-9)return '<span class="mut">—</span>';diff=(cur-ref)/Math.abs(ref)*100;txt=(diff>=0?'▲ ':'▼ ')+Math.abs(diff).toFixed(0)+'%'}
+  const big=pp?Math.abs(diff)>=1:Math.abs(diff)>=5;
+  return `<span class="${!big||!dir?'mut':(diff*dir>0?'up':'down')}">${txt}</span>`;
+}
+function tbl(head,rows,cls){return `<div class="scroll"><table class="${cls||''}"><tr>${head.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${head.length}" class="empty">Sin datos.</td></tr>`}</table></div>`}
+function bars(rows,col){const T=Math.max(1,...rows.map(r=>r[1]));return rows.map(r=>`<div class="mrow"><span>${r[0]}</span><div class="bar"><i style="width:${r[1]/T*100}%;background:${col}"></i></div><span>${r[2]}</span></div>`).join('')}
+
+function flagged(){
   const out=[];
   hoy.cli.forEach(c=>{
     const r=[];
@@ -228,13 +365,178 @@ function alerts(){
     if(r.length)out.push({c,r});
   });
   out.sort((a,b)=>b.r.length-a.r.length||b.c[3]-a.c[3]);
-  $('alerts').innerHTML=out.slice(0,15).map(({c,r})=>`<div class="alert ${r.length>=3?'h':''}"><div class="l1"><b>${esc(c[0])}</b><span class="mut">Dep ${num(c[2])} · ${money(c[3])} &nbsp; Ret ${num(c[7])} · ${money(c[8])}</span></div><div class="l2">${r.map(x=>`<span class="chip ${r.length>=3?'cb':'cr'}">${esc(x)}</span>`).join('')}</div></div>`).join('')||'<div class="empty">Sin alertas con los umbrales actuales.</div>';
+  return out;
 }
-function feed(){
-  $('feed').innerHTML=(hoy.feed||[]).map(e=>`<div class="fe"><span class="t">${hhmm(e.t)}</span><span class="chip ${e.k==='d'?'cd':'cr'}">${e.k==='d'?'Depósito':'Retiro'}</span><b>${esc(e.al||'—')}</b><span class="mut">${esc(e.m)}</span><span class="chip cf">${esc(e.o)}</span><span class="a ${e.k==='d'?'g':'o'}">${money(e.a)}</span></div>`).join('')||'<div class="empty">Sin movimientos.</div>';
+
+function report(){
+  const vd=hoy.dia,td=isToday(),h=curH(),H=td?h:24,v2=(hoy.v||1)>=2;
+  const d=hoy.dep,p=hoy.pay,ops=hoy.ops||{},hr=hoy.hrs;
+  const start=Date.UTC(...vd.split('-').map((x,i)=>i==1?x-1:+x),4);
+  const prevDays=[1,2,3,4,5,6,7].map(i=>H7[dayStr(vd,-i)]).filter(x=>x&&x.hrs);
+  const R={ayer:H7[dayStr(vd,-1)]||ayer,sem:H7[dayStr(vd,-7)]};
+  const cut=(day,k)=>day&&day.hrs&&day.hrs[k]?sum(day.hrs[k].slice(0,H)):null;
+  const M=[
+   ['Depósitos acreditados',x=>cut(x,'dn'),fN,1],
+   ['Monto depositado',x=>cut(x,'da'),fM,1],
+   ['Retiros pagados',x=>cut(x,'pn'),fN,1],
+   ['Monto retirado',x=>cut(x,'pa'),fM,1],
+   ['Balance (dep. − ret.)',x=>{const a=cut(x,'da'),b=cut(x,'pa');return a==null||b==null?null:a-b},fM,1],
+   ['Ticket medio depósito',x=>{const n=cut(x,'dn');return n?cut(x,'da')/n:null},fM,0],
+   ['Ticket medio retiro',x=>{const n=cut(x,'pn');return n?cut(x,'pa')/n:null},fM,0],
+   ['% depósitos manuales',x=>{const n=cut(x,'dn'),m=cut(x,'dm');return n&&m!=null?m/n*100:null},fP,0,1],
+   ['Depósitos denegados',x=>cut(x,'den'),fN,-1],
+   ['Tasa de rechazo',x=>{const a=cut(x,'dn'),b=cut(x,'den'),c=cut(x,'pen');return a==null||b==null?null:(a+b+(c||0))?b/(a+b+(c||0))*100:null},fP,-1,1],
+   ['Depósitos pendientes (NEW)',x=>cut(x,'pen'),fN,-1]];
+  if(!td)M.push(['Clientes activos',x=>x&&x.totalClientes!=null?x.totalClientes:null,fN,0]);
+  const avg=f=>{const a=prevDays.map(f).filter(x=>x!=null&&isFinite(x));return a.length>=2?sum(a)/a.length:null};
+  const cur=M.map(m=>m[1](hoy)),ref=M.map((m,i)=>({a:m[1](R.ayer),s:m[1](R.sem),p:avg(m[1])}));
+  const idx={dn:0,da:1,pn:2,pa:3,bal:4,tkd:5,man:7,den:8,rate:9,pen:10};
+  const early=td&&h<2;
+
+  // ---------- hallazgos ----------
+  const I=[];const add=(sev,t,x)=>I.push({sev,t,x});
+  const pc=(c,r)=>r?Math.round((c-r)/r*100):null;
+  const upDn=n=>n>=0?`${n}% por encima`:`${-n}% por debajo`;
+  if(!early){
+    [['dn','da','Depósitos','depósitos',1],['pn','pa','Retiros','retiros',1]].forEach(([kn,ka,T,t])=>{
+      const c=cur[idx[kn]],pr=ref[idx[kn]].p,ca=cur[idx[ka]],pa=ref[idx[ka]].p;
+      if(pr==null||!pr)return;const q=pc(c,pr),qa=pc(ca,pa);
+      const x=`${fN(c)} ${t} (${fM(ca)}) frente a un promedio de ${fN(pr)} (${fM(pa)}) en los últimos ${prevDays.length} días${td?' a esta misma hora':''}.`;
+      if(Math.abs(q)<15)add('ok',`${T} en línea con lo habitual (${q>=0?'+':''}${q}%)`,x);
+      else if(kn==='dn')add(q>0?'ok':'warn',`${T} ${upDn(q)} del promedio`,x+(q<0?' Menos entrada de dinero de lo normal.':' Día de alta actividad.'));
+      else add(q>0?'warn':'info',`${T} ${upDn(q)} del promedio`,x+(q>0?' Más carga de pago para el equipo y más salida de caja.':''));
+    });
+  }
+  const net=d.amt-p.amt,rat=d.amt?p.amt/d.amt*100:0;
+  if(net<0)add('bad','Balance negativo',`Se pagaron ${fM(-net)} más de lo que se acreditó (retiros = ${rat.toFixed(0)}% de los depósitos).`);
+  else add(rat>85?'warn':'ok',rat>85?'Balance ajustado':'Balance positivo',`Depósitos − retiros = ${fM(net)}; los retiros equivalen al ${rat.toFixed(0)}% de lo depositado.`);
+  const pk=a=>{let m=0;a.forEach((v,i)=>{if(v>a[m])m=i});return m},tot=(a)=>sum(a)||1;
+  if(d.n){const i=pk(hr.dn),j=pk(hr.da);add('info',`Pico de depósitos a las ${hh(i)}`,`${hr.dn[i]} depósitos (${Math.round(hr.dn[i]/tot(hr.dn)*100)}% del día). Mayor monto horario: ${hh(j)} con ${fM(hr.da[j])}.`)}
+  if(p.n){const i=pk(hr.pn);add('info',`Pico de retiros a las ${hh(i)}`,`${hr.pn[i]} retiros (${Math.round(hr.pn[i]/tot(hr.pn)*100)}% del día), ${fM(hr.pa[i])}.`)}
+  // rechazos
+  const base=d.n+d.den+d.pend,rate=base?d.den/base*100:0,rAvg=avg(x=>{const a=x.dep;if(!a)return null;const b=a.n+a.den+a.pend;return b?a.den/b*100:null});
+  const dAmt=d.denAmt||0;
+  let rx=`${d.den} depósitos denegados${v2?` por ${fM(dAmt)}`:''} sobre ${num(base)} intentos (${rate.toFixed(1)}%)${rAvg!=null?`; promedio ${rAvg.toFixed(1)}%`:''}.`;
+  if(v2&&d.denByM){const w=Object.entries(d.denByM).map(([k,v])=>{const s=(d.byM[k]||{n:0}).n,t=s+v.n;return{k,n:v.n,r:t?v.n/t*100:0,t}}).filter(x=>x.t>=5).sort((a,b)=>b.r-a.r)[0];if(w&&w.r>0)rx+=` Peor método: ${w.k||'—'} (${w.n} de ${w.t}, ${w.r.toFixed(0)}%).`;
+    const i=pk(hr.den||[0]);if(hr.den&&hr.den[i])rx+=` Más rechazos a las ${hh(i)} (${hr.den[i]}).`;
+    const by=Object.entries(d.denBy||{}).sort((a,b)=>b[1].n-a[1].n)[0];if(by)rx+=` Origen principal: ${by[0]} (${by[1].n}).`}
+  add(rate>=8?'bad':rate>=4?'warn':'ok',rate>=8?'Tasa de rechazo alta':rate>=4?'Tasa de rechazo a vigilar':'Rechazos bajo control',rx);
+  // pendientes
+  if(d.pend>0){
+    const old=(hoy.penL||[])[0],age=old?(td?fT((Date.now()-old[2])/1000):'a las '+hhmm(old[2])):'';
+    add(td?(old&&Date.now()-old[2]>30*60000?'warn':'info'):'bad',td?`${d.pend} depósitos pendientes ahora`:`${d.pend} depósitos quedaron sin resolver`,`${v2?fM(d.penAmt||0)+' en estado NEW. ':''}${old?`El más antiguo: ${old[0]} (${fM(old[1])}, ${td?'hace '+age:age}).`:''}`);
+  }else add('ok','Sin depósitos pendientes','Todos los depósitos del día están resueltos (acreditados o denegados).');
+  // retiros: tiempo de atención
+  const L=p.lat;
+  if(L&&L.n){const av=L.sum/L.n,slow=L.bk[4]/L.n*100;
+    add(av>1800?'bad':av>900?'warn':'ok',`Retiros atendidos en ${fT(av)} de media`,`Máximo ${fT(L.max)}; ${L.bk[0]} retiros en menos de 5 min y ${L.bk[4]} (${slow.toFixed(0)}%) tardaron más de 1 h.`);
+  }
+  // cobertura por hora
+  if(v2){const z=[];for(let i=0;i<(td?h:24);i++){const dem=hr.dn[i]+(hr.den[i]||0)+(hr.pen[i]||0);if(!hr.pn[i]&&!hr.dm[i]&&dem>0)z.push(i)}
+    if(z.length)add('warn',`${z.length} hora${z.length>1?'s':''} sin operador activo`,`Hubo demanda sin actividad de ningún operador a las ${z.map(hh).join(', ')}.`);
+    else add('ok','Cobertura continua','En todas las horas con demanda hubo algún operador activo.')}
+  // operadores y horario
+  const iv=blocks.length?[...(S.intervals(blocks,dayStr(vd,-1))||[]),...(S.intervals(blocks,vd)||[])]:[];
+  const hasSched=blocks.length&&!!S.intervals(blocks,vd),end=start+864e5,sc={};
+  if(hasSched)iv.forEach(x=>{const a=Math.max(x.a,start),b=Math.min(x.b,end);if(b>a)(sc[cap(x.name)]=sc[cap(x.name)]||[]).push({a,b})});
+  const scH=n=>(sc[n]||[]).reduce((s,x)=>s+(Math.min(x.b,td?Date.now():x.b)-x.a)/36e5,0);
+  const inShift=(n,i)=>(sc[n]||[]).some(x=>x.a<start+(i+1)*36e5&&x.b>start+i*36e5);
+  const names=[...new Set([...Object.keys(ops),...Object.keys(sc)])],real=Object.keys(ops).filter(n=>!/^ID /.test(n));
+  const tot2=n=>ops[n]?ops[n].dn+ops[n].pn:0;
+  if(real.length){const top=real.slice().sort((a,b)=>tot2(b)-tot2(a))[0],T=sum(real.map(tot2));
+    add('ok',`${top} lideró la operación`,`${num(tot2(top))} operaciones (${Math.round(tot2(top)/T*100)}% de las manuales): ${ops[top].dn} depósitos y ${ops[top].pn} retiros.`)}
+  const unk=Object.keys(ops).filter(n=>/^ID /.test(n));
+  if(unk.length)add('warn','Retiros aprobados por IDs sin identificar',unk.map(n=>`${n}: ${ops[n].pn} retiros (${fM(ops[n].pa)})`).join('; ')+'. Añade el ID en config.js (payoutIds).');
+  if(hasSched){
+    const no=Object.keys(sc).filter(n=>!tot2(n)&&scH(n)>=1);
+    if(no.length)add('bad',`Sin actividad registrada con turno: ${no.join(', ')}`,'Tenían turno programado y no aparece ninguna operación a su nombre.');
+    const off=Object.keys(ops).filter(n=>!/^ID /.test(n)&&!sc[n]&&tot2(n)>0);
+    if(off.length)add('warn',`Actividad sin turno asignado: ${off.join(', ')}`,off.map(n=>`${n}: ${tot2(n)} operaciones`).join('; ')+' (según la pestaña HORARIO).');
+    const out=Object.keys(sc).map(n=>{const o=ops[n];if(!o)return null;let x=0;o.h.forEach((v,i)=>{if(v&&!inShift(n,i))x+=v});return{n,x,t:tot2(n)}}).filter(r=>r&&r.x>=8&&r.x/r.t>=.2);
+    if(out.length)add('info','Actividad fuera del turno programado',out.map(r=>`${r.n}: ${r.x} de ${r.t} operaciones fuera de su franja`).join('; ')+'.');
+  }else if(blocks.length)add('info','Sin horario para este día','El horario publicado ya no incluye esta fecha; se omiten los análisis de turnos.');
+  const gaps=real.filter(n=>ops[n].gp>=60).sort((a,b)=>ops[b].gp-ops[a].gp).slice(0,3);
+  if(gaps.length)add('info','Pausas largas entre operaciones',gaps.map(n=>`${n}: ${fT(ops[n].gp*60)} desde las ${hhmm(ops[n].gpAt)}`).join('; ')+' (puede ser descanso o fin de turno parcial).');
+  // clientes
+  const cl=hoy.cli.slice(),bd=cl.slice().sort((a,b)=>b[3]-a[3])[0],bp=cl.slice().sort((a,b)=>b[8]-a[8])[0];
+  if(bd&&bd[3])add('info',`Mayor depositante: ${bd[0]}`,`${fM(bd[3])} en ${bd[2]} depósitos (${bd[4]} manuales, ${bd[5]} automáticos, ${bd[6]} físicos).`);
+  if(bp&&bp[8])add('info',`Mayor retirador: ${bp[0]}`,`${fM(bp[8])} en ${bp[7]} retiros; depositó ${fM(bp[3])}.`);
+  if(hoy.conc&&hoy.conc.d10>=.5)add('info','Concentración de depósitos',`Los 10 mayores depositantes suman el ${Math.round(hoy.conc.d10*100)}% del monto depositado y los 10 mayores retiradores el ${Math.round(hoy.conc.p10*100)}% de lo retirado.`);
+  const fl=flagged();
+  if(fl.length){const hi=fl.filter(f=>f.r.length>=3).length;add(hi?'bad':'warn',`${fl.length} cliente${fl.length>1?'s':''} sobre los umbrales`,fl.slice(0,3).map(f=>`${f.c[0]}: ${f.r.join(', ')}`).join('. ')+(fl.length>3?`. +${fl.length-3} más en Alertas.`:'.')+(hi?` ${hi} con 3 o más señales.`:''))}
+  else add('ok','Sin clientes sobre los umbrales','Ningún cliente supera los umbrales de vigilancia configurados.');
+  if(!v2)add('info','Día guardado con versión anterior','Faltan detalles de rechazos por hora/método, pendientes y tiempos de atención. El recolector actualizado lo regenerará automáticamente.');
+  if(td)add('info','Informe parcial',`Datos hasta las ${hhmm(Date.now())} RD. Las comparativas usan solo horas completas (hasta las ${hh(h)}).`);
+
+  // ---------- HTML ----------
+  const sev={bad:0,warn:1,info:2,ok:3};I.sort((a,b)=>sev[a.sev]-sev[b.sev]);
+  const box=x=>`<div class="ib ${x.sev}"><b>${esc(x.t)}</b><span>${esc(x.x)}</span></div>`;
+  const col=(t,c,l)=>`<div class="igc"><div class="tt ${c}">${t} (${l.length})</div>${l.map(box).join('')||'<div class="empty">Nada que destacar.</div>'}</div>`;
+  const okL=I.filter(x=>x.sev==='ok'),flL=I.filter(x=>x.sev==='bad'||x.sev==='warn'),inL=I.filter(x=>x.sev==='info');
+  let o='';
+  o+=`<h3>Resumen${td?` · hasta las ${hh(h)} (horas completas)`:''}</h3>`;
+  o+=`<div class="sub" style="margin-bottom:8px">${early?'Muy temprano para comparar con otros días.':'Cada variación se compara con ayer, con el mismo día de la semana pasada y con el promedio de los '+prevDays.length+' días anteriores disponibles.'}</div>`;
+  o+=tbl(['Indicador','Hoy','Ayer','Δ','Sem. pasada','Δ','Prom. 7 d','Δ'],M.map((m,i)=>{const f=m[2],pp=m[4],c=cur[i],r=ref[i];
+    return [m[0],`<b>${f(c)}</b>`,f(r.a),dcell(c,r.a,m[3],pp),f(r.s),dcell(c,r.s,m[3],pp),f(r.p),dcell(c,r.p,m[3],pp)]}),'kv');
+  o+=`<h3>Aciertos y fallas</h3><div class="ig">${col('Aciertos','g',okL)}${col('Fallas y puntos de atención','neg',flL)}${col('Observaciones','mut',inL)}</div>`;
+  // operadores
+  o+='<h3>Operadores</h3>';
+  o+=tbl(['Operador','Turno','Dep. #','Dep. $','Ret. #','Ret. $','Total','Ops/hora','Atención ret.','Pausa mayor','Primera','Última'],names.sort((a,b)=>tot2(b)-tot2(a)).map(n=>{
+    const x=ops[n]||{dn:0,da:0,pn:0,pa:0,fd:0,ld:0,fp:0,lp:0,ln:0,ls:0,gp:0},hs=scH(n),f=Math.min(...[x.fd,x.fp].filter(Boolean)),l=Math.max(x.ld,x.lp);
+    const tr=(sc[n]||[]).map(s=>hhmm(s.a)+'–'+hhmm(s.b)).join(' · ')||(hasSched?'<span class="cb chip">sin turno</span>':'—');
+    return [`<b>${esc(n)}</b>`,`<span class="mut">${tr}</span>`,`<span class="g">${num(x.dn)}</span>`,money(x.da),`<span class="o">${num(x.pn)}</span>`,money(x.pa),`<b>${num(x.dn+x.pn)}</b>`,hs>=.5?(tot2(n)/hs).toFixed(1):'—',x.ln?fT(x.ls/x.ln):'—',x.gp>=30?fT(x.gp*60):'—',isFinite(f)?hhmm(f):'—',l?hhmm(l):'—']}));
+  // canales y métodos
+  o+='<div class="two"><div><h3>Canales de depósito</h3>';
+  o+=tbl(['Canal','Depósitos','Monto','% monto','Ticket medio'],[['Manual',d.manual],['Automático',d.auto],['Punto Físico',d.fisico]].map(([k,c])=>[k,num(c.n),money(c.amt),d.amt?Math.round(c.amt/d.amt*100)+'%':'—',c.n?money(c.amt/c.n):'—']));
+  o+='</div><div><h3>Distribución por importe</h3>';
+  const BKL=['< 500','500–1.000','1.000–2.500','2.500–5.000','5.000–10.000','10.000–25.000','≥ 25.000'];
+  o+=v2&&d.bk?`<div class="sub">Depósitos</div>`+bars(d.bk.map((v,i)=>[BKL[i],v,num(v)]),'#2ecc71')+`<div class="sub" style="margin-top:6px">Retiros</div>`+bars(p.bk.map((v,i)=>[BKL[i],v,num(v)]),'#f5a524'):'<div class="empty">No disponible en este día.</div>';
+  o+='</div></div>';
+  o+='<h3>Métodos de depósito (con rechazos)</h3>';
+  const ms=[...new Set([...Object.keys(d.byM),...Object.keys(d.denByM||{}),...Object.keys(d.penByM||{})])];
+  o+=tbl(['Método','Aprobados','Monto','Denegados','Monto den.','Tasa rechazo','Pendientes'],ms.map(k=>{const a=d.byM[k]||{n:0,amt:0},b=(d.denByM||{})[k]||{n:0,amt:0},c=(d.penByM||{})[k]||{n:0},t=a.n+b.n;return{k,a,b,c,t,r:t?b.n/t*100:0}}).sort((x,y)=>y.a.amt-x.a.amt).map(x=>[esc(x.k||'—'),num(x.a.n),money(x.a.amt),`<span class="${x.b.n?'neg':'mut'}">${num(x.b.n)}</span>`,money(x.b.amt),`<span class="${x.r>=8?'neg':x.r>=4?'o':''}">${x.t?x.r.toFixed(1)+'%':'—'}</span>`,num(x.c.n||0)]));
+  o+='<h3>Métodos de retiro</h3>'+tbl(['Método','Retiros','Monto','% monto','Ticket medio'],Object.entries(p.byM).sort((a,b)=>b[1].amt-a[1].amt).map(([k,c])=>[esc(k||'—'),num(c.n),money(c.amt),p.amt?Math.round(c.amt/p.amt*100)+'%':'—',money(c.amt/c.n)]));
+  // retiros espera
+  if(L&&L.n){const LBL=['< 5 min','5–15 min','15–30 min','30–60 min','> 1 h'];o+='<h3>Tiempo de atención de retiros</h3>'+bars(L.bk.map((v,i)=>[LBL[i],v,`${num(v)} · ${Math.round(v/L.n*100)}%`]),'#4cc9f0')}
+  // por hora
+  o+='<h3>Actividad por hora (RD)</h3>';
+  const rowsH=[['Depósitos',hr.dn,'76,201,240'],['Retiros',hr.pn,'245,165,36'],['Manuales',hr.dm,'46,204,113'],['Automáticos',hr.dau,'76,201,240'],['Punto físico',hr.df,'179,136,255'],['Denegados',hr.den,'255,93,93'],['Pendientes',hr.pen,'245,165,36']].filter(r=>r[1]);
+  o+=`<div class="scroll"><table class="hm"><tr><th>Hora</th>${Array.from({length:24},(_,i)=>`<th>${String(i).padStart(2,'0')}</th>`).join('')}<th>Total</th></tr>`+rowsH.map(([n,a,c])=>{const mx=Math.max(1,...a);return `<tr><td>${n}</td>${a.map(v=>`<td style="background:rgba(${c},${v?(.12+.55*v/mx).toFixed(2):0})">${v||''}</td>`).join('')}<td><b>${num(sum(a))}</b></td></tr>`}).join('')+'</table></div>';
+  // clientes
+  o+='<div class="two"><div><h3>Mayores depósitos del día</h3>'+tbl(['Cliente','Monto','Hora','Operador','Método'],(hoy.topD||[]).map(x=>[`<b>${esc(x[0])}</b>`,money(x[1]),hhmm(x[2]),esc(x[3]),esc(x[4])]))+'</div>';
+  o+='<div><h3>Mayores retiros del día</h3>'+tbl(['Cliente','Monto','Hora','Operador','Método'],(hoy.topP||[]).map(x=>[`<b>${esc(x[0])}</b>`,money(x[1]),hhmm(x[2]),esc(x[3]),esc(x[4])]))+'</div></div>';
+  o+='<div class="two"><div><h3>Clientes a vigilar</h3>'+tbl(['Cliente','Dep.','Ret.','Señales'],fl.slice(0,8).map(f=>[`<b>${esc(f.c[0])}</b>`,`${f.c[2]} · ${money(f.c[3])}`,`${f.c[7]} · ${money(f.c[8])}`,`<span class="mut">${esc(f.r.join(', '))}</span>`]))+'</div>';
+  o+='<div><h3>Más depósitos denegados por cliente</h3>'+tbl(['Cliente','Denegados','Monto'],(hoy.denC||[]).map(x=>[`<b>${esc(x[0])}</b>`,num(x[1]),money(x[2])]))+'</div></div>';
+  if((hoy.penL||[]).length)o+='<h3>Depósitos pendientes más antiguos</h3>'+tbl(['Cliente','Monto','Hora','Método'],hoy.penL.map(x=>[`<b>${esc(x[0])}</b>`,money(x[1]),hhmm(x[2]),esc(x[3])]));
+  $('infT').textContent='Informe del día · '+new Intl.DateTimeFormat('es-DO',{timeZone:'UTC',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(vd+'T12:00:00Z'));
+  $('infBody').innerHTML=o;
 }
 
 /* ---------- UI ---------- */
+const go=d=>{cv={lo:0,hi:24};hoverI=null;sel=(d&&d!==rdDate(Date.now()))?d:null;subscribe()};
+const shiftDay=n=>{const t=new Date(Date.parse(viewDate()+'T12:00:00Z')+n*864e5).toISOString().slice(0,10);if(t<=rdDate(Date.now()))go(t)};
+(function(){
+  const px=e=>{const r=$('chS').getBoundingClientRect();return (e.clientX-r.left)/r.width*CG.W},fr=e=>Math.min(1,Math.max(0,(px(e)-CG.L)/(CG.W-CG.L-CG.PR)));
+  const C=$('chart');
+  C.addEventListener('wheel',e=>{if(!CG||!e.target.closest('#chS'))return;e.preventDefault();zoomBy(fr(e),e.deltaY>0?1.2:1/1.2)},{passive:false});
+  C.addEventListener('pointerdown',e=>{if(!CG||!e.target.closest('#chS'))return;drag={x:px(e),lo:cv.lo};C.setPointerCapture&&C.setPointerCapture(e.pointerId)});
+  C.addEventListener('pointermove',e=>{
+    if(!CG||!$('chS'))return;
+    const r=$('chW').getBoundingClientRect();lastPx=e.clientX-r.left;
+    if(drag){const span=cv.hi-cv.lo,lo=Math.max(0,Math.min(24-span,drag.lo-(px(e)-drag.x)/CG.bw));if(Math.abs(lo-cv.lo)>.001){cv={lo,hi:lo+span};chart(chH)}return}
+    const x=px(e);hoverI=(x>=CG.L&&x<=CG.W-CG.PR)?Math.floor(cv.lo+(x-CG.L)/CG.bw):null;if(hoverI==null)$('chTip').style.display='none';else tip(hoverI);
+  });
+  C.addEventListener('pointerup',()=>{drag=null});
+  C.addEventListener('pointerleave',()=>{if(!drag){hoverI=null;const t=$('chTip');if(t)t.style.display='none'}});
+  C.addEventListener('dblclick',e=>{if(e.target.closest('#chS')){cv={lo:0,hi:24};chart(chH)}});
+  C.addEventListener('click',e=>{const l=e.target.closest('.lg');if(l){hid[l.dataset.s]=!hid[l.dataset.s];chart(chH)}});
+  $('zIn').onclick=()=>zoomBy(.5,.7);$('zOut').onclick=()=>zoomBy(.5,1/.7);$('zRst').onclick=()=>{cv={lo:0,hi:24};chart(chH)};
+})();
+$('bInf').onclick=()=>{view=view==='informe'?'panel':'informe';if(view==='informe')hist();render()};
+$('bPrint').onclick=()=>window.print();
+$('bCopy').onclick=()=>{const t=$('infT').innerText+'\n\n'+$('infBody').innerText;const done=()=>{$('bCopy').textContent='¡Copiado!';setTimeout(()=>$('bCopy').textContent='Copiar',1500)};(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(done,()=>{const x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();document.execCommand('copy');x.remove();done()})};
+$('dPrev').onclick=()=>shiftDay(-1);$('dNext').onclick=()=>shiftDay(1);$('dHoy').onclick=()=>go(null);
+$('dSel').onchange=e=>{if(e.target.value)go(e.target.value)};
 document.addEventListener('click',e=>{
   const t=e.target.closest('.tab');if(!t)return;
   t.parentNode.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');
