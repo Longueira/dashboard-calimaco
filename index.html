@@ -125,7 +125,9 @@ svg text{fill:var(--mut);font-size:10px}
 .orow .a{text-align:right;font-weight:700}.orow .chip{justify-self:start}
 .orow.pz{grid-template-columns:minmax(0,1fr);background:rgba(255,93,93,.10);border-left:3px solid var(--bad);padding:6px 9px;color:#ff8a8a;font-weight:600;white-space:normal;margin:2px 0}
 .orow.pz.off{background:rgba(138,155,176,.08);border-left-color:var(--mut);color:var(--mut)}
-@container (max-width:700px){.orow{grid-template-columns:70px 88px minmax(0,1fr) max-content}.orow .om{grid-column:3;grid-row:2}.orow .ow{grid-column:4;grid-row:2;justify-self:end}.orow{row-gap:2px}}
+@container (max-width:700px){.orow{grid-template-columns:70px 108px minmax(0,1fr) max-content;white-space:normal;row-gap:2px}.orow b{white-space:normal;overflow-wrap:anywhere}.orow .om{grid-column:2/5;grid-row:2;white-space:normal}.orow .ow{grid-column:2/5;grid-row:3;justify-self:start;white-space:normal}.orow .ow:empty{display:none}}
+#opTl.fs{position:fixed;inset:0;z-index:300;background:var(--bg);overflow:auto;padding:52px 10px 14px}#opTl.fs #opSvg{min-width:900px}
+#tlX{display:none;position:fixed;top:10px;right:10px;z-index:301}#tlX.on{display:inline-block}
 .clk{cursor:pointer}.clk:hover{border-color:var(--acc)}tr.clk:hover td{background:var(--panel2)}
 @media print{#mod{display:none!important}}
 </style>
@@ -571,7 +573,7 @@ const inMode=e=>e.k!==3&&(opMode==='all'||(opMode==='ret'?e.k===1:e.k!==1));
 function opAnalyze(n){
   const all=evAll(),mineAll=all[n]||[],mine=mineAll.filter(inMode),vd=hoy.dia,td=isToday(),now=Date.now(),G=gapMin*60000;
   // Punto Físico: lo cobra el cliente en taquilla horas después; la actividad del operador cuenta a la hora de aceptado
-  const st0=dStart(vd),pfAcc=mine.filter(e=>e.k===1&&e.pf&&e.ac!=null).map(e=>({...e,t:st0+e.ac*1000,pfa:true,pt:e.t,w:null})),
+  const st0=dStart(vd),pfAcc=mine.filter(e=>e.k===1&&e.pf&&e.ac>=0).map(e=>({...e,t:st0+e.ac*1000,pfa:true,pt:e.t,w:null})),
     mineW=mine.filter(e=>!e.pf).concat(pfAcc).sort((a,b)=>a.t-b.t);
   let W=opWindows(vd,n);const synth=!(W&&W.length);
   if(synth)W=mineW.length?[{a:mineW[0].t,b:mineW[mineW.length-1].t,syn:true}]:[];
@@ -657,11 +659,11 @@ function opList(n,A){
   (A.marks||[]).forEach(e=>rows.push({t:e.t,h:`<div class="orow"><span class="mut">${hms(e.t)}</span><span class="chip cf">Aceptado</span><b>${esc(e.al||'—')}</b><span class="mut om">${esc(e.m)}</span><span class="a o">${e.a?money(e.a):''}</span><span class="mut ow"></span></div>`}));
   { const g={};A.mineW.filter(e=>e.pfa).forEach(e=>{const k=e.t;(g[k]||(g[k]={t:e.t,n:0,a:0}));g[k].n++;g[k].a+=e.a});
     Object.values(g).forEach(x=>rows.push({t:x.t,h:`<div class="orow"><span class="mut">${hms(x.t)}</span><span class="chip cr">Aceptado PF</span><b>${x.n} retiro${x.n>1?'s':''} Punto Físico</b><span class="mut om">Retiro En Punto Físico</span><span class="a o">${money(x.a)}</span><span class="mut ow">cuenta como actividad</span></div>`}))}
-  A.mine.forEach(e=>rows.push({t:e.t,h:e.pf?`<div class="orow" style="opacity:.6"><span class="mut">${hms(e.t)}</span><span class="chip cf">PF cobrado</span><b>${esc(e.al||'—')}</b><span class="mut om">${esc(e.m)}</span><span class="a o">${money(e.a)}</span><span class="mut ow">cobrado en taquilla${e.ac!=null?' · acept. '+hms(dStart(hoy.dia)+e.ac*1000):''} · no cuenta como actividad</span></div>`:`<div class="orow"><span class="mut">${hms(e.t)}</span><span class="chip ${e.k===1?'cr':e.k===2?'cb':'cd'}">${e.k===1?'Retiro pagado':e.k===2?'Rechazado':'Depósito'}</span><b>${esc(e.al||'—')}</b><span class="mut om">${esc(e.m)}</span><span class="a ${e.k===1?'o':e.k===2?'neg':'g'}">${money(e.a)}</span><span class="mut ow">${e.k===1&&e.ac!=null?'acept. '+hms(dStart(hoy.dia)+e.ac*1000)+' · pagado tras '+fT(Math.max(0,(e.t-(dStart(hoy.dia)+e.ac*1000))/1000)):''}</span></div>`}));
+  A.mine.forEach(e=>rows.push({t:e.t,h:e.pf?`<div class="orow" style="opacity:.6"><span class="mut">${hms(e.t)}</span><span class="chip cf">PF cobrado</span><b>${esc(e.al||'—')}</b><span class="mut om">${esc(e.m)}</span><span class="a o">${money(e.a)}</span><span class="mut ow">cobrado en taquilla${e.ac!=null?' · acept. '+(e.ac<0?'(día anterior) ':'')+hms(dStart(hoy.dia)+e.ac*1000):''} · no cuenta como actividad</span></div>`:`<div class="orow"><span class="mut">${hms(e.t)}</span><span class="chip ${e.k===1?'cr':e.k===2?'cb':'cd'}">${e.k===1?'Retiro pagado':e.k===2?'Rechazado':'Depósito'}</span><b>${esc(e.al||'—')}</b><span class="mut om">${esc(e.m)}</span><span class="a ${e.k===1?'o':e.k===2?'neg':'g'}">${money(e.a)}</span><span class="mut ow">${e.k===1&&e.ac!=null?'acept. '+hms(dStart(hoy.dia)+e.ac*1000)+' · pagado tras '+fT(Math.max(0,(e.t-(dStart(hoy.dia)+e.ac*1000))/1000)):''}</span></div>`}));
   const lab={start:g=>`Sin actividad desde el inicio del turno: ${fT(g.g/1000)} (${hhmm(g.a)} → ${hhmm(g.b)})`,mid:g=>`Inactivo ${fT(g.g/1000)} · ${hhmm(g.a)} → ${hhmm(g.b)}`,end:g=>g.b>=Date.now()-6e4&&isToday()?`Sin actividad desde las ${hhmm(g.a)} (${fT(g.g/1000)})`:`Dejó de operar ${fT(g.g/1000)} antes del fin del turno · ${hhmm(g.a)} → ${hhmm(g.b)}`};
   A.gaps.forEach(g=>rows.push({t:g.a+(g.k==='start'?-1:.5),h:`<div class="orow pz">⏸ ${lab[g.k](g)}</div>`}));
   if(real)for(let i=1;i<A.mineW.length;i++){const a=A.mineW[i-1].t,b=A.mineW[i].t;if(b-a>=gapMin*6e4&&!W.some(w=>a<w.b&&b>w.a))rows.push({t:a+.5,h:`<div class="orow pz off">⏸ Sin actividad ${fT((b-a)/1000)} (fuera de turno) · ${hhmm(a)} → ${hhmm(b)}</div>`})}
-  rows.sort((a,b)=>a.t-b.t);
+  rows.sort((a,b)=>b.t-a.t);
   return rows.map(r=>r.h).join('')||'<div class="empty">Sin operaciones en esta vista.</div>';
 }
 function renderOp(){
@@ -679,19 +681,24 @@ function renderOp(){
   const keep=$('opList')?$('opList').scrollTop:0;
   box.innerHTML=`<div class="ostats">${st('Operaciones',num(m.length))}${st('Depósitos',`${num(c0)} · ${money(amt(0))}`,'g')}${st('Retiros',`${num(c1)} · ${money(amt(1))}`,'o')}${c2?st('Rechazados',num(c2),'neg'):''}${st('Primera / última',A.mineW.length?hhmm(A.mineW[0].t)+' / '+hhmm(A.mineW[A.mineW.length-1].t):'—')}${st('Inactividad en turno',A.shiftMs?`${fT(A.idle/1000)} · ${Math.round(A.idle/A.shiftMs*100)}%`:'—',A.shiftMs&&A.idle/A.shiftMs>=.25?'neg':A.shiftMs&&A.idle/A.shiftMs>=.1?'o':'')}${st('Mayor pausa',maxGap?`${fT(maxGap.g/1000)} · ${hhmm(maxGap.a)}`:'—')}</div>
   <h3>Diagnóstico del turno</h3><div class="ig2" id="opIns">${A.I.map(x=>`<div class="ib ${x.sev}"><b>${esc(x.t)}</b><span>${esc(x.x)}</span></div>`).join('')||'<div class="empty">Sin datos suficientes.</div>'}</div>
-  <h3 class="h3z"><span>Línea de tiempo del día</span><span class="tabs"><span class="zb" id="tzIn" title="Acercar">＋</span><span class="zb" id="tzOut" title="Alejar">－</span><span class="zb" id="tzRst" title="Ver todo">Todo</span></span></h3><div id="opTl">${opTimeline(n,A)}</div>
+  <h3 class="h3z"><span>Línea de tiempo del día</span><span class="tabs"><span class="zb" id="tzIn" title="Acercar">＋</span><span class="zb" id="tzOut" title="Alejar">－</span><span class="zb" id="tzRst" title="Ver todo">Todo</span><span class="zb" id="tzFs" title="Ver el gráfico a pantalla completa">⛶ Ampliar</span></span></h3><div id="opTl">${opTimeline(n,A)}</div>
   <h3>Actividad, operación por operación</h3><div class="ol" id="opList">${opList(n,A)}</div>`;
   $('opList').scrollTop=keep;
 }
 function openOp(n){opSel=n;tz=null;$('mod').style.display='flex';$('mod').scrollTop=0;document.body.style.overflow='hidden';evOpen();renderOp()}
-function closeOp(){opSel=null;$('mod').style.display='none';document.body.style.overflow='';evClose();TL=null}
+function tlFs(on){const el=$('opTl');if(!el)return;if(on&&el.classList.contains('fs'))return;let x=$('tlX');if(!x){x=document.createElement('span');x.id='tlX';x.className='zb';x.textContent='✕ Cerrar';x.onclick=()=>tlFs(false);document.body.appendChild(x)}
+  if(on&&!el._ph){el._ph=document.createComment('tl');el.parentNode.insertBefore(el._ph,el);document.body.appendChild(el)}   // fuera del contenedor para que ocupe toda la pantalla
+  if(!on&&el._ph){el._ph.parentNode.insertBefore(el,el._ph);el._ph.remove();el._ph=null}
+  el.classList.toggle('fs',on);x.classList.toggle('on',on);
+  try{if(on){(document.documentElement.requestFullscreen||(()=>Promise.reject())).call(document.documentElement).then(()=>screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape')).catch(()=>{})}else{if(document.fullscreenElement)document.exitFullscreen();if(screen.orientation&&screen.orientation.unlock)screen.orientation.unlock()}}catch(e){}}
+function closeOp(){tlFs(false);opSel=null;$('mod').style.display='none';document.body.style.overflow='';evClose();TL=null}
 
 /* ---------- UI ---------- */
 const go=d=>{closeOp();cv={lo:0,hi:24};hoverI=null;sel=(d&&d!==rdDate(Date.now()))?d:null;subscribe()};
 const shiftDay=n=>{const t=new Date(Date.parse(viewDate()+'T12:00:00Z')+n*864e5).toISOString().slice(0,10);if(t<=rdDate(Date.now()))go(t)};
 document.addEventListener('click',e=>{const o=e.target.closest('[data-op]');if(o&&!opSel)openOp(o.dataset.op)});
 $('mClose').onclick=closeOp;$('mod').addEventListener('click',e=>{if(e.target===$('mod'))closeOp()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&opSel)closeOp()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&opSel){if($('opTl')&&$('opTl').classList.contains('fs'))tlFs(false);else closeOp()}});
 $('opGap').onchange=e=>{gapMin=Number(e.target.value)||15;localStorage.setItem('pd_gap',gapMin);renderOp()};
 $('mCopy').onclick=()=>{const t=opSel+' · '+$('mSub').textContent+'\n\n'+$('opIns').innerText;const done=()=>{$('mCopy').textContent='¡Copiado!';setTimeout(()=>$('mCopy').textContent='Copiar',1500)};(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(done,()=>{const x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();document.execCommand('copy');x.remove();done()})};
 (function(){const M=$('mb');
@@ -714,7 +721,7 @@ $('mCopy').onclick=()=>{const t=opSel+' · '+$('mSub').textContent+'\n\n'+$('opI
   M.addEventListener('pointermove',e=>{if(!dg||!TL)return;const r=$('opSvg').getBoundingClientRect(),dt=(e.clientX-dg.x)/r.width*TL.Wd/(TL.Wd-TL.L-TL.Rr)*(dg.hi-dg.lo);if(Math.abs(e.clientX-dg.x)<3&&!tz)return;tz={lo:dg.lo-dt,hi:dg.hi-dt};drawTl()});
   M.addEventListener('pointerup',()=>{dg=null});
   M.addEventListener('dblclick',e=>{if(e.target.closest('#opSvg')){tz=null;drawTl()}});
-  M.addEventListener('click',e=>{const t=e.target.closest('#tzIn,#tzOut,#tzRst');if(!t)return;if(t.id==='tzRst'){tz=null;drawTl()}else tlZoom(.5,t.id==='tzIn'?.7:1/.7)});
+  M.addEventListener('click',e=>{const t=e.target.closest('#tzIn,#tzOut,#tzRst,#tzFs,#tlX');if(!t)return;if(t.id==='tzFs'){tlFs(true);return}if(t.id==='tlX'){tlFs(false);return}if(t.id==='tzRst'){tz=null;drawTl()}else tlZoom(.5,t.id==='tzIn'?.7:1/.7)});
   M.addEventListener('mouseleave',()=>{const t=$('opTip');if(t)t.style.display='none'});
 })();
 (function(){
