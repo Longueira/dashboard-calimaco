@@ -126,9 +126,12 @@ svg text{fill:var(--mut);font-size:10px}
 .orow.pz{grid-template-columns:minmax(0,1fr);background:rgba(255,93,93,.10);border-left:3px solid var(--bad);padding:6px 9px;color:#ff8a8a;font-weight:600;white-space:normal;margin:2px 0}
 .orow.pz.off{background:rgba(138,155,176,.08);border-left-color:var(--mut);color:var(--mut)}
 @container (max-width:700px){.orow{grid-template-columns:70px 108px minmax(0,1fr) max-content;white-space:normal;row-gap:2px}.orow b{white-space:normal;overflow-wrap:anywhere}.orow .om{grid-column:2/5;grid-row:2;white-space:normal}.orow .ow{grid-column:2/5;grid-row:3;justify-self:start;white-space:normal}.orow .ow:empty{display:none}}
-#opTl.fs{position:fixed;inset:0;z-index:300;background:var(--bg);overflow:auto;padding:52px 10px 14px}#opTl.fs #opSvg{min-width:900px}
-#tlZ{display:none;position:fixed;top:10px;left:10px;z-index:301;gap:6px}#tlZ.on{display:flex}#opTl.fs #opSvg{touch-action:none!important}
-#tlX{display:none;position:fixed;top:10px;right:10px;z-index:301}#tlX.on{display:inline-block}
+#tlF{display:none;position:fixed;inset:0;z-index:300;background:rgba(4,7,11,.94);align-items:center;justify-content:center;padding:16px;overflow:auto}
+#tlF.on{display:flex}
+#tlF .tlfw{width:min(1600px,100%);margin:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px 14px}
+#tlF .tlfh{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+#tlF .tlfh b{font-size:16px}#tlF .tabs{display:flex;gap:6px;flex-wrap:wrap}
+#tlFb #opSvg{touch-action:none}#tlFb svg text{font-size:12px}
 .clk{cursor:pointer}.clk:hover{border-color:var(--acc)}tr.clk:hover td{background:var(--panel2)}
 @media print{#mod{display:none!important}}
 </style>
@@ -615,8 +618,8 @@ function opAnalyze(n){
   return {mine,mineW,marks,mineAll,W,gaps,idle,shiftMs,I,synth,hasW};
 }
 let tz=null,curA=null;
-function opTimeline(n,A){
-  const evs0=A.mineW,pfp=A.mine.filter(e=>e.pf),Wd=1000,Hd=262,L=44,Rr=10,wins=A.W;
+function opTimeline(n,A,W0,H0){
+  const evs0=A.mineW,pfp=A.mine.filter(e=>e.pf),Wd=W0||1000,Hd=H0||262,L=W0?52:44,Rr=W0?14:10,wins=A.W;
   if(!evs0.length&&!wins.length)return '<div class="empty">Sin actividad registrada.</div>';
   const day0=dStart(hoy.dia),day1=day0+864e5,now=Date.now();
   const real=!A.synth&&wins.length,pad=real?60*6e4:15*6e4;
@@ -650,7 +653,7 @@ function opTimeline(n,A){
   return `<div style="position:relative" id="opTlW">${s}<div id="opTip" class="ctip" style="display:none;top:auto"></div></div><div class="sub" style="margin-top:4px"><span class="g">▌</span>Depósitos &nbsp;<span class="o">▌</span>Retiros (hora de pagado; Punto Físico: hora de aceptado) &nbsp;<span style="color:#8a7a5a">¦</span>Cobro en taquilla (no cuenta) &nbsp;<span style="color:#4cc9f0">▼</span>Aceptado, sin pagar aún &nbsp;<span class="neg">▌</span>Rechazos &nbsp;<span style="color:#ff8a8a">▒</span>Inactividad (${gapMin}+ min) &nbsp;<span style="color:#4cc9f0">░</span>Turno &nbsp;· Abajo: % acumulado de sus operaciones; la línea punteada es el ritmo uniforme ideal.${outN?` Fuera de este rango: ${outN} operaciones (ver la lista de abajo).`:''}<br><span style="opacity:.7">Rueda: zoom · arrastrar: mover · doble clic: ver todo · pasa el ratón sobre una marca para ver el detalle${tz?` · vista ${hhmm(lo)}–${hhmm(hi)}`:''}</span></div>`;
 }
 const TLs0=()=>dStart(hoy.dia);
-function drawTl(){if(opSel&&curA&&$('opTl'))$('opTl').innerHTML=opTimeline(opSel,curA)}
+function drawTl(){if(!opSel||!curA)return;if(tlOn){const b=$('tlFb');const w=Math.max(320,b.clientWidth||1000),h=Math.round(Math.max(230,Math.min(560,innerHeight-200)));b.innerHTML=opTimeline(opSel,curA,w,h)}else if($('opTl'))$('opTl').innerHTML=opTimeline(opSel,curA)}
 function tlZoom(fr,f){
   if(!TL)return;const sp=TL.hi-TL.lo,a=TL.lo+fr*sp,ns=Math.min(TL.fhi-TL.flo,Math.max(6e5,sp*f)),lo=a-fr*ns;
   tz=ns>=TL.fhi-TL.flo-1e3?null:{lo,hi:lo+ns};drawTl();
@@ -667,7 +670,8 @@ function opList(n,A){
   rows.sort((a,b)=>b.t-a.t);
   return rows.map(r=>r.h).join('')||'<div class="empty">Sin operaciones en esta vista.</div>';
 }
-function renderOp(){
+function renderOp(){renderOp0();if(tlOn)drawTl()}
+function renderOp0(){
   if(!opSel||!hoy)return;
   const n=opSel,box=$('mb');
   $('mTitle').textContent=n;
@@ -682,17 +686,28 @@ function renderOp(){
   const keep=$('opList')?$('opList').scrollTop:0;
   box.innerHTML=`<div class="ostats">${st('Operaciones',num(m.length))}${st('Depósitos',`${num(c0)} · ${money(amt(0))}`,'g')}${st('Retiros',`${num(c1)} · ${money(amt(1))}`,'o')}${c2?st('Rechazados',num(c2),'neg'):''}${st('Primera / última',A.mineW.length?hhmm(A.mineW[0].t)+' / '+hhmm(A.mineW[A.mineW.length-1].t):'—')}${st('Inactividad en turno',A.shiftMs?`${fT(A.idle/1000)} · ${Math.round(A.idle/A.shiftMs*100)}%`:'—',A.shiftMs&&A.idle/A.shiftMs>=.25?'neg':A.shiftMs&&A.idle/A.shiftMs>=.1?'o':'')}${st('Mayor pausa',maxGap?`${fT(maxGap.g/1000)} · ${hhmm(maxGap.a)}`:'—')}</div>
   <h3>Diagnóstico del turno</h3><div class="ig2" id="opIns">${A.I.map(x=>`<div class="ib ${x.sev}"><b>${esc(x.t)}</b><span>${esc(x.x)}</span></div>`).join('')||'<div class="empty">Sin datos suficientes.</div>'}</div>
-  <h3 class="h3z"><span>Línea de tiempo del día</span><span class="tabs"><span class="zb" id="tzIn" title="Acercar">＋</span><span class="zb" id="tzOut" title="Alejar">－</span><span class="zb" id="tzRst" title="Ver todo">Todo</span><span class="zb" id="tzFs" title="Ver el gráfico a pantalla completa">⛶ Ampliar</span></span></h3><div id="opTl">${opTimeline(n,A)}</div>
+  <h3 class="h3z"><span>Línea de tiempo del día</span><span class="tabs"><span class="zb" id="tzIn" title="Acercar">＋</span><span class="zb" id="tzOut" title="Alejar">－</span><span class="zb" id="tzRst" title="Ver todo">Todo</span><span class="zb" id="tzFs" title="Ver el gráfico a pantalla completa">⛶ Ampliar</span></span></h3><div id="opTl">${tlOn?'<div class="empty">Gráfico ampliado abierto.</div>':opTimeline(n,A)}</div>
   <h3>Actividad, operación por operación</h3><div class="ol" id="opList">${opList(n,A)}</div>`;
   $('opList').scrollTop=keep;
 }
 function openOp(n){opSel=n;tz=null;$('mod').style.display='flex';$('mod').scrollTop=0;document.body.style.overflow='hidden';evOpen();renderOp()}
-function tlFs(on){const el=$('opTl');if(!el)return;if(on&&el.classList.contains('fs'))return;let x=$('tlX');if(!x){x=document.createElement('span');x.id='tlX';x.className='zb';x.textContent='✕ Cerrar';x.onclick=()=>tlFs(false);document.body.appendChild(x);const z=document.createElement('span');z.id='tlZ';z.innerHTML='<span class="zb" id="fzIn">＋</span><span class="zb" id="fzOut">－</span><span class="zb" id="fzRst">Todo</span>';document.body.appendChild(z)}
-  { const z=$('tlZ');if(z)z.classList.toggle('on',on) }
-  if(on&&!el._ph){el._ph=document.createComment('tl');el.parentNode.insertBefore(el._ph,el);document.body.appendChild(el)}   // fuera del contenedor para que ocupe toda la pantalla
-  if(!on&&el._ph){el._ph.parentNode.insertBefore(el,el._ph);el._ph.remove();el._ph=null}
-  el.classList.toggle('fs',on);x.classList.toggle('on',on);
-  try{if(on){(document.documentElement.requestFullscreen||(()=>Promise.reject())).call(document.documentElement).then(()=>screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape')).catch(()=>{})}else{if(document.fullscreenElement)document.exitFullscreen();if(screen.orientation&&screen.orientation.unlock)screen.orientation.unlock()}}catch(e){}}
+let tlOn=false;
+function tlFs(on){
+  const F=$('tlF');
+  if(on){
+    if(!curA||!opSel||tlOn)return;tlOn=true;tz=null;
+    $('tlFn').textContent=opSel;$('tlFsub').textContent=$('mSub').textContent;
+    $('opTl').innerHTML='<div class="empty">Gráfico ampliado abierto.</div>';
+    F.classList.add('on');drawTl();
+    if(matchMedia('(pointer:coarse)').matches){try{document.documentElement.requestFullscreen().then(()=>screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape')).catch(()=>{})}catch(e){}}
+  }else{
+    if(!tlOn)return;tlOn=false;F.classList.remove('on');$('tlFb').innerHTML='';tz=null;
+    try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}
+    drawTl();
+  }
+}
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&tlOn)tlFs(false)});
+addEventListener('resize',()=>{if(tlOn)drawTl()});
 function closeOp(){tlFs(false);opSel=null;$('mod').style.display='none';document.body.style.overflow='';evClose();TL=null}
 
 /* ---------- UI ---------- */
@@ -700,7 +715,7 @@ const go=d=>{closeOp();cv={lo:0,hi:24};hoverI=null;sel=(d&&d!==rdDate(Date.now()
 const shiftDay=n=>{const t=new Date(Date.parse(viewDate()+'T12:00:00Z')+n*864e5).toISOString().slice(0,10);if(t<=rdDate(Date.now()))go(t)};
 document.addEventListener('click',e=>{const o=e.target.closest('[data-op]');if(o&&!opSel)openOp(o.dataset.op)});
 $('mClose').onclick=closeOp;$('mod').addEventListener('click',e=>{if(e.target===$('mod'))closeOp()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&opSel){if($('opTl')&&$('opTl').classList.contains('fs'))tlFs(false);else closeOp()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&opSel){if(tlOn)tlFs(false);else closeOp()}});
 $('opGap').onchange=e=>{gapMin=Number(e.target.value)||15;localStorage.setItem('pd_gap',gapMin);renderOp()};
 $('mCopy').onclick=()=>{const t=opSel+' · '+$('mSub').textContent+'\n\n'+$('opIns').innerText;const done=()=>{$('mCopy').textContent='¡Copiado!';setTimeout(()=>$('mCopy').textContent='Copiar',1500)};(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(done,()=>{const x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();document.execCommand('copy');x.remove();done()})};
 (function(){const M=document;
@@ -723,7 +738,8 @@ $('mCopy').onclick=()=>{const t=opSel+' · '+$('mSub').textContent+'\n\n'+$('opI
   M.addEventListener('pointermove',e=>{if(!dg||!TL)return;const r=$('opSvg').getBoundingClientRect(),dt=(e.clientX-dg.x)/r.width*TL.Wd/(TL.Wd-TL.L-TL.Rr)*(dg.hi-dg.lo);if(Math.abs(e.clientX-dg.x)<3&&!tz)return;tz={lo:dg.lo-dt,hi:dg.hi-dt};drawTl()});
   M.addEventListener('pointerup',()=>{dg=null});
   M.addEventListener('dblclick',e=>{if(e.target.closest('#opSvg')){tz=null;drawTl()}});
-  M.addEventListener('click',e=>{const t=e.target.closest('#tzIn,#tzOut,#tzRst,#tzFs,#tlX,#fzIn,#fzOut,#fzRst');if(!t)return;if(t.id==='fzRst'){tz=null;drawTl();return}if(t.id==='fzIn'||t.id==='fzOut'){tlZoom(.5,t.id==='fzIn'?.7:1/.7);return}if(t.id==='tzFs'){tlFs(true);return}if(t.id==='tlX'){tlFs(false);return}if(t.id==='tzRst'){tz=null;drawTl()}else tlZoom(.5,t.id==='tzIn'?.7:1/.7)});
+  M.addEventListener('click',e=>{if(e.target===$('tlF')){tlFs(false);return}const t=e.target.closest('#tzIn,#tzOut,#tzRst,#tzFs,#fzIn,#fzOut,#fzRst,#fzX');if(!t)return;
+    if(t.id==='tzFs'){tlFs(true);return}if(t.id==='fzX'){tlFs(false);return}if(t.id==='tzRst'||t.id==='fzRst'){tz=null;drawTl();return}tlZoom(.5,/In$/.test(t.id)?.7:1/.7)});
   M.addEventListener('mouseleave',()=>{const t=$('opTip');if(t)t.style.display='none'});
 })();
 (function(){
@@ -779,5 +795,6 @@ else{
 }
 })();
 </script>
+<div id="tlF"><div class="tlfw"><div class="tlfh"><div><b id="tlFn"></b> <span class="mut" id="tlFsub"></span></div><div class="tabs"><span class="zb" id="fzIn" title="Acercar">＋</span><span class="zb" id="fzOut" title="Alejar">－</span><span class="zb" id="fzRst" title="Ver el turno completo">Todo</span><span class="zb" id="fzX">✕ Cerrar</span></div></div><div id="tlFb"></div></div></div>
 </body>
 </html>
