@@ -127,6 +127,7 @@ svg text{fill:var(--mut);font-size:10px}
 .orow.pz.off{background:rgba(138,155,176,.08);border-left-color:var(--mut);color:var(--mut)}
 @container (max-width:700px){.orow{grid-template-columns:70px 108px minmax(0,1fr) max-content;white-space:normal;row-gap:2px}.orow b{white-space:normal;overflow-wrap:anywhere}.orow .om{grid-column:2/5;grid-row:2;white-space:normal}.orow .ow{grid-column:2/5;grid-row:3;justify-self:start;white-space:normal}.orow .ow:empty{display:none}}
 #opTl.fs{position:fixed;inset:0;z-index:300;background:var(--bg);overflow:auto;padding:52px 10px 14px}#opTl.fs #opSvg{min-width:900px}
+#tlZ{display:none;position:fixed;top:10px;left:10px;z-index:301;gap:6px}#tlZ.on{display:flex}#opTl.fs #opSvg{touch-action:none!important}
 #tlX{display:none;position:fixed;top:10px;right:10px;z-index:301}#tlX.on{display:inline-block}
 .clk{cursor:pointer}.clk:hover{border-color:var(--acc)}tr.clk:hover td{background:var(--panel2)}
 @media print{#mod{display:none!important}}
@@ -686,7 +687,8 @@ function renderOp(){
   $('opList').scrollTop=keep;
 }
 function openOp(n){opSel=n;tz=null;$('mod').style.display='flex';$('mod').scrollTop=0;document.body.style.overflow='hidden';evOpen();renderOp()}
-function tlFs(on){const el=$('opTl');if(!el)return;if(on&&el.classList.contains('fs'))return;let x=$('tlX');if(!x){x=document.createElement('span');x.id='tlX';x.className='zb';x.textContent='✕ Cerrar';x.onclick=()=>tlFs(false);document.body.appendChild(x)}
+function tlFs(on){const el=$('opTl');if(!el)return;if(on&&el.classList.contains('fs'))return;let x=$('tlX');if(!x){x=document.createElement('span');x.id='tlX';x.className='zb';x.textContent='✕ Cerrar';x.onclick=()=>tlFs(false);document.body.appendChild(x);const z=document.createElement('span');z.id='tlZ';z.innerHTML='<span class="zb" id="fzIn">＋</span><span class="zb" id="fzOut">－</span><span class="zb" id="fzRst">Todo</span>';document.body.appendChild(z)}
+  { const z=$('tlZ');if(z)z.classList.toggle('on',on) }
   if(on&&!el._ph){el._ph=document.createComment('tl');el.parentNode.insertBefore(el._ph,el);document.body.appendChild(el)}   // fuera del contenedor para que ocupe toda la pantalla
   if(!on&&el._ph){el._ph.parentNode.insertBefore(el,el._ph);el._ph.remove();el._ph=null}
   el.classList.toggle('fs',on);x.classList.toggle('on',on);
@@ -701,7 +703,7 @@ $('mClose').onclick=closeOp;$('mod').addEventListener('click',e=>{if(e.target===
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&opSel){if($('opTl')&&$('opTl').classList.contains('fs'))tlFs(false);else closeOp()}});
 $('opGap').onchange=e=>{gapMin=Number(e.target.value)||15;localStorage.setItem('pd_gap',gapMin);renderOp()};
 $('mCopy').onclick=()=>{const t=opSel+' · '+$('mSub').textContent+'\n\n'+$('opIns').innerText;const done=()=>{$('mCopy').textContent='¡Copiado!';setTimeout(()=>$('mCopy').textContent='Copiar',1500)};(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(done,()=>{const x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();document.execCommand('copy');x.remove();done()})};
-(function(){const M=$('mb');
+(function(){const M=document;
   M.addEventListener('mousemove',e=>{
     const sv=e.target.closest&&e.target.closest('#opSvg');const tip=$('opTip');if(!tip)return;
     if(!sv||!TL){tip.style.display='none';return}
@@ -721,7 +723,7 @@ $('mCopy').onclick=()=>{const t=opSel+' · '+$('mSub').textContent+'\n\n'+$('opI
   M.addEventListener('pointermove',e=>{if(!dg||!TL)return;const r=$('opSvg').getBoundingClientRect(),dt=(e.clientX-dg.x)/r.width*TL.Wd/(TL.Wd-TL.L-TL.Rr)*(dg.hi-dg.lo);if(Math.abs(e.clientX-dg.x)<3&&!tz)return;tz={lo:dg.lo-dt,hi:dg.hi-dt};drawTl()});
   M.addEventListener('pointerup',()=>{dg=null});
   M.addEventListener('dblclick',e=>{if(e.target.closest('#opSvg')){tz=null;drawTl()}});
-  M.addEventListener('click',e=>{const t=e.target.closest('#tzIn,#tzOut,#tzRst,#tzFs,#tlX');if(!t)return;if(t.id==='tzFs'){tlFs(true);return}if(t.id==='tlX'){tlFs(false);return}if(t.id==='tzRst'){tz=null;drawTl()}else tlZoom(.5,t.id==='tzIn'?.7:1/.7)});
+  M.addEventListener('click',e=>{const t=e.target.closest('#tzIn,#tzOut,#tzRst,#tzFs,#tlX,#fzIn,#fzOut,#fzRst');if(!t)return;if(t.id==='fzRst'){tz=null;drawTl();return}if(t.id==='fzIn'||t.id==='fzOut'){tlZoom(.5,t.id==='fzIn'?.7:1/.7);return}if(t.id==='tzFs'){tlFs(true);return}if(t.id==='tlX'){tlFs(false);return}if(t.id==='tzRst'){tz=null;drawTl()}else tlZoom(.5,t.id==='tzIn'?.7:1/.7)});
   M.addEventListener('mouseleave',()=>{const t=$('opTip');if(t)t.style.display='none'});
 })();
 (function(){
