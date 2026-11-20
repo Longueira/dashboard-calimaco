@@ -32,7 +32,7 @@ h1{margin:0;font-size:20px;font-weight:700;letter-spacing:.2px;white-space:nowra
 .op .top{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
 .op .nm{font-weight:700;font-size:15px;white-space:nowrap}
 .chip{display:inline-flex;align-items:center;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:700;white-space:nowrap}
-.cd{background:rgba(46,204,113,.15);color:var(--ok)}.cr{background:rgba(245,165,36,.16);color:var(--ret)}.ci{background:rgba(138,155,176,.15);color:var(--mut)}.cb{background:rgba(255,93,93,.16);color:var(--bad)}.cf{background:rgba(76,201,240,.14);color:var(--acc)}
+.cd{background:rgba(46,204,113,.15);color:var(--ok)}.cr{background:rgba(245,165,36,.16);color:var(--ret)}.ci{background:rgba(138,155,176,.15);color:var(--mut)}.cb{background:rgba(255,93,93,.16);color:var(--bad)}.ce{background:rgba(168,85,247,.18);color:#c99bff}.cf{background:rgba(76,201,240,.14);color:var(--acc)}
 .chips{display:flex;gap:5px;flex-wrap:wrap}
 .op .hr{color:var(--mut);font-size:12px;margin:5px 0 8px}
 .op .st{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;flex-wrap:wrap}
@@ -171,7 +171,7 @@ svg text{fill:var(--mut);font-size:10px}
   <div class="card" style="margin-bottom:12px"><h2><span id="shT">En turno ahora</span> <span class="sub" id="shSub"></span></h2><div class="shift" id="shift"></div></div>
 
   <div class="card" id="sxCard" style="margin-bottom:12px"><h2>Usuarios sospechosos <span class="sub" id="sxSub"></span></h2>
-    <div class="sxtool"><span class="tabs"><span class="tab on" data-sxs="pend">Sin revisar</span><span class="tab" data-sxs="all">Todos</span></span><span class="tabs"><span class="tab on" data-sxr="all">Todos los motivos</span><span class="tab" data-sxr="raf">Ráfaga</span><span class="tab" data-sxr="vol">Volumen</span><span class="tab" data-sxr="rep">Repetidos</span></span><input id="sxQ" placeholder="Buscar cliente…"><button class="btn" id="sxBThr">Umbrales</button></div>
+    <div class="sxtool"><span class="tabs"><span class="tab on" data-sxs="pend">Sin revisar</span><span class="tab" data-sxs="all">Todos</span></span><span class="tabs"><span class="tab on" data-sxr="all">Todos los motivos</span><span class="tab" data-sxr="esc">Escalera</span><span class="tab" data-sxr="raf">Ráfaga</span><span class="tab" data-sxr="vol">Volumen</span><span class="tab" data-sxr="rep">Repetidos</span></span><input id="sxQ" placeholder="Buscar cliente…"><button class="btn" id="sxBThr">Umbrales</button></div>
     <div id="sxThr" style="display:none"></div><div class="sub" id="sxRules" style="margin-bottom:6px"></div><div class="sub" id="sxMsg" style="color:var(--ret)"></div><div class="scroll" id="sxList"></div></div>
 
   <div class="grid row3" style="margin-bottom:12px">
@@ -249,7 +249,7 @@ function tickClock(){
   const n=new Date();$('clock').textContent=new Intl.DateTimeFormat('es-DO',{timeZone:'America/Santo_Domingo',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(n)+' RD';
   $('fecha').textContent=new Intl.DateTimeFormat('es-DO',{timeZone:'UTC',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(viewDate()+'T12:00:00Z'))+(isToday()?'':' · día anterior');$('dSel').value=viewDate();$('dSel').max=rdDate(Date.now());$('dNext').disabled=isToday();
   const age=estado?(Date.now()-estado.ts)/1000:1e9,d=$('dRec');
-  if(estado&&estado.ok&&age<120){d.className='dot ok';$('tRec').textContent='Recolector activo · '+ago(estado.ts)+' · web r10 / colector '+(estado.ver||'antiguo')+(estado.bf>0?' · cargando histórico (faltan '+estado.bf+' días)':'')}
+  if(estado&&estado.ok&&age<120){d.className='dot ok';$('tRec').textContent='Recolector activo · '+ago(estado.ts)+' · web r11 / colector '+(estado.ver||'antiguo')+(estado.bf>0?' · cargando histórico (faltan '+estado.bf+' días)':'')}
   else if(estado&&age<120){d.className='dot warn';$('tRec').textContent='Recolector con error'}
   else{d.className='dot bad';$('tRec').textContent=estado?'Sin señal del recolector · '+ago(estado.ts):'Esperando datos…'}
   const re=$('recErr'),msg=estado?[estado.err&&'Error: '+estado.err,estado.bfErr&&'Histórico: '+estado.bfErr].filter(Boolean).join(' · '):'';re.textContent=msg;re.style.display=msg?'block':'none';
@@ -812,10 +812,10 @@ else{
   }
 }
 /* ---------- Usuarios sospechosos ---------- */
-const SX_DEF={rN:5,rGap:2,vN:30,vAmt:300000,rep:10},SX_MIN={rN:4,rGap:3,vN:15,vAmt:150000,rep:6};
+const SX_DEF={rN:5,rGap:2,vN:30,vAmt:300000,rep:10,eN:8},SX_MIN={rN:4,rGap:3,vN:15,vAmt:150000,rep:6,eN:6};
 let SX={},SXA={},SXL=JSON.parse(localStorage.getItem('pd_sxack')||'{}'),SXC=Object.assign({},SX_DEF,JSON.parse(localStorage.getItem('pd_sx')||'{}')),sxF={q:'',r:'all',st:'pend'},sxCur=null,sxDb=null,sxQn=0;
-const sxCfg=()=>({rN:Math.max(SX_MIN.rN,+SXC.rN||5),rGap:Math.min(SX_MIN.rGap,Math.max(.25,+SXC.rGap||2)),vN:Math.max(SX_MIN.vN,+SXC.vN||30),vAmt:Math.max(SX_MIN.vAmt,+SXC.vAmt||3e5),rep:Math.max(SX_MIN.rep,+SXC.rep||10)});
-const SXR={raf:['Ráfaga','cb'],vol:['Volumen','cr'],rep:['Importe repetido','cf']};
+const sxCfg=()=>({rN:Math.max(SX_MIN.rN,+SXC.rN||5),rGap:Math.min(SX_MIN.rGap,Math.max(.25,+SXC.rGap||2)),vN:Math.max(SX_MIN.vN,+SXC.vN||30),vAmt:Math.max(SX_MIN.vAmt,+SXC.vAmt||3e5),rep:Math.max(SX_MIN.rep,+SXC.rep||10),eN:Math.max(SX_MIN.eN,+SXC.eN||8)});
+const SXR={esc:['Escalera de importes','ce'],raf:['Ráfaga','cb'],vol:['Volumen','cr'],rep:['Importe repetido','cf']};
 const sxWho=e=>/zaholaix/i.test(e||'')?'Zaholaix':/longueira/i.test(e||'')?'David':(e||'?');
 const sxMe=()=>{try{return firebase.auth().currentUser.email}catch(e){return 'prueba'}};
 const sxFecha=d=>new Intl.DateTimeFormat('es-DO',{timeZone:'UTC',weekday:'short',day:'numeric',month:'short'}).format(new Date(d+'T12:00:00Z'));
@@ -829,6 +829,8 @@ function sxEval(dia,k,c,mt){
   if(best){const g=Math.max(...best.slice(1).map((e,i)=>e[0]-best[i][0]));R.push({id:'raf',t:`${best.length} depósitos seguidos por ${M(best[0][2])} (${hms(st+best[0][0]*1000)}–${hms(st+best[best.length-1][0]*1000)}), máx. ${fT(g)} entre uno y otro`+(runs>1?` · ${runs} ráfagas con ${inR} depósitos en total`:'')})}
   if(d.length>=C.vN||amt>=C.vAmt)R.push({id:'vol',t:`${num(d.length)} depósitos por ${money(amt)} en el día`});
   const rc={};d.forEach(e=>rc[e[1]]=(rc[e[1]]||0)+1);const [ra,rn]=Object.entries(rc).sort((a,b)=>b[1]-a[1])[0];
+  { let lb=[d[0]],lc=[d[0]];for(let i=1;i<d.length;i++){const x=Math.abs(d[i][1]-d[i-1][1]);if(x>=1&&x<=3)lc.push(d[i]);else lc=[d[i]];if(lc.length>lb.length)lb=lc}
+    if(lb.length>=C.eN){const a0=lb[0][1],a1=lb[lb.length-1][1];R.unshift({id:'esc',t:`${lb.length} depósitos seguidos cambiando el importe de 1 a 3 pesos (${num(a0)} → ${num(a1)}), ${hms(st+lb[0][0]*1000)}–${hms(st+lb[lb.length-1][0]*1000)}`})} }
   if(rn>=C.rep)R.push({id:'rep',t:`${rn} depósitos de exactamente ${money(+ra)}`});
   if(!R.length)return null;
   const mc={};d.forEach(e=>mc[M(e[2])]=(mc[M(e[2])]||0)+1);
@@ -881,11 +883,11 @@ function sxRender(){
   document.querySelectorAll('#sxCard [data-sxs]').forEach(t=>t.classList.toggle('on',t.dataset.sxs===sxF.st));
   document.querySelectorAll('#sxCard [data-sxr]').forEach(t=>t.classList.toggle('on',t.dataset.sxr===sxF.r));
   $('sxList').innerHTML=sxRows.length?`<table><tr><th>Fecha</th><th>Cliente</th><th>Motivo</th><th>Depósitos</th><th>Franja</th><th>Estado</th></tr>${sxRows.map((a,i)=>{const k=sxAck(a),w=sxWorse(a,k);return `<tr class="clk" data-sxi="${i}"><td>${sxFecha(a.dia)}</td><td><b>${esc(a.al)}</b></td><td style="text-align:left">${a.R.map(r=>`<span class="chip ${SXR[r.id][1]}">${SXR[r.id][0]}</span>`).join(' ')}</td><td><span class="g">${num(a.n)}</span> · ${money(a.amt)}</td><td class="mut">${hhmm(a.f)}–${hhmm(a.l)}</td><td>${w?(k?'<span class="chip cb">Empeoró</span>':'<span class="chip cb">Nueva</span>'):`<span class="mut">Vista · ${sxWho(k.by)} ${new Intl.DateTimeFormat('es-DO',{timeZone:'America/Santo_Domingo',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(k.ts))}</span>`}</td></tr>`}).join('')}</table>`:`<div class="empty">${all.length?'Ningún caso con estos filtros.':'Sin casos sospechosos detectados.'}</div>`;
-  const C=sxCfg();$('sxRules').textContent=`Ráfaga: ${C.rN}+ depósitos seguidos por el mismo método con ≤${C.rGap} min entre ellos · Volumen: ${C.vN}+ depósitos o ${money(C.vAmt)}+ en el día · Importe repetido: ${C.rep}+ depósitos del mismo importe exacto`;
+  const C=sxCfg();$('sxRules').textContent=`Escalera: ${C.eN}+ depósitos seguidos cuyo importe cambia de 1 a 3 pesos · Ráfaga: ${C.rN}+ depósitos seguidos por el mismo método con ≤${C.rGap} min entre ellos · Volumen: ${C.vN}+ depósitos o ${money(C.vAmt)}+ en el día · Importe repetido: ${C.rep}+ depósitos del mismo importe exacto`;
 }
 function sxThrForm(){
   const C=sxCfg(),f=(id,l,v,mn,st)=>`<label class="sxf"><span class="mut">${l}</span><input type="number" id="${id}" value="${v}" step="${st||1}"><span class="mut">${mn}</span></label>`;
-  $('sxThr').innerHTML=`<div class="sxfs">${f('sx_rN','Ráfaga: nº de depósitos seguidos',C.rN,'mín. 4')}${f('sx_rGap','Ráfaga: minutos máx. entre depósitos',C.rGap,'máx. 3',.25)}${f('sx_vN','Volumen: nº de depósitos en el día',C.vN,'mín. 15')}${f('sx_vAmt','Volumen: importe del día (RD$)',C.vAmt,'mín. 150.000',1000)}${f('sx_rep','Repetidos: nº del mismo importe',C.rep,'mín. 6')}</div><div class="sxbt"><button class="btn" id="sxSave">Guardar (para los dos)</button><button class="btn" id="sxDef">Valores iniciales</button><span class="mut" id="sxTm"></span></div>`;
+  $('sxThr').innerHTML=`<div class="sxfs">${f('sx_eN','Escalera: nº de depósitos seguidos',C.eN,'mín. 6')}${f('sx_rN','Ráfaga: nº de depósitos seguidos',C.rN,'mín. 4')}${f('sx_rGap','Ráfaga: minutos máx. entre depósitos',C.rGap,'máx. 3',.25)}${f('sx_vN','Volumen: nº de depósitos en el día',C.vN,'mín. 15')}${f('sx_vAmt','Volumen: importe del día (RD$)',C.vAmt,'mín. 150.000',1000)}${f('sx_rep','Repetidos: nº del mismo importe',C.rep,'mín. 6')}</div><div class="sxbt"><button class="btn" id="sxSave">Guardar (para los dos)</button><button class="btn" id="sxDef">Valores iniciales</button><span class="mut" id="sxTm"></span></div>`;
 }
 function sxSave(v){
   SXC=Object.assign({},SX_DEF,v);localStorage.setItem('pd_sx',JSON.stringify(SXC));sxRender();
@@ -900,7 +902,7 @@ document.addEventListener('click',e=>{
   const s=t.closest('[data-sxs]');if(s){sxF.st=s.dataset.sxs;return sxRender()}
   const f=t.closest('[data-sxr]');if(f){sxF.r=f.dataset.sxr;return sxRender()}
   if(t.closest('#sxBThr')){const b=$('sxThr');if(b.style.display==='none'){sxThrForm();b.style.display='block'}else b.style.display='none';return}
-  if(t.closest('#sxSave')){const g=id=>+$(id).value;return sxSave({rN:g('sx_rN'),rGap:g('sx_rGap'),vN:g('sx_vN'),vAmt:g('sx_vAmt'),rep:g('sx_rep')})}
+  if(t.closest('#sxSave')){const g=id=>+$(id).value;return sxSave({rN:g('sx_rN'),rGap:g('sx_rGap'),vN:g('sx_vN'),vAmt:g('sx_vAmt'),rep:g('sx_rep'),eN:g('sx_eN')})}
   if(t.closest('#sxDef')){sxSave(SX_DEF);return sxThrForm()}
   if(t.closest('#hSx')){$('sxCard').scrollIntoView({behavior:'smooth'})}
 });
