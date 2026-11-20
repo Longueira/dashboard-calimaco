@@ -126,6 +126,19 @@ svg text{fill:var(--mut);font-size:10px}
 .orow.pz{grid-template-columns:minmax(0,1fr);background:rgba(255,93,93,.10);border-left:3px solid var(--bad);padding:6px 9px;color:#ff8a8a;font-weight:600;white-space:normal;margin:2px 0}
 .orow.pz.off{background:rgba(138,155,176,.08);border-left-color:var(--mut);color:var(--mut)}
 @container (max-width:700px){.orow{grid-template-columns:70px 108px minmax(0,1fr) max-content;white-space:normal;row-gap:2px}.orow b{white-space:normal;overflow-wrap:anywhere}.orow .om{grid-column:2/5;grid-row:2;white-space:normal}.orow .ow{grid-column:2/5;grid-row:3;justify-self:start;white-space:normal}.orow .ow:empty{display:none}}
+#hSx{display:none}#hSx.on{display:inline-flex;border-color:var(--bad);color:var(--bad)}
+.ov{display:none;position:fixed;inset:0;z-index:310;background:rgba(4,7,11,.86);align-items:center;justify-content:center;padding:16px;overflow:auto}.ov.on{display:flex}
+.ovb{width:min(600px,100%);margin:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+#sxA{z-index:320}#sxA .ovb{border:2px solid var(--bad);box-shadow:0 0 0 6px rgba(255,93,93,.12)}#sxD .ovb{width:min(920px,100%)}
+.sxh{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}.sxn{font-size:20px;font-weight:700}
+.sxr{display:flex;flex-direction:column;gap:6px;margin:12px 0}.sxr>div{line-height:1.5}
+.sxs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0}.sxs>div{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 10px;display:flex;flex-direction:column;gap:2px}
+.sxbt{display:flex;gap:8px;justify-content:flex-end;align-items:center;flex-wrap:wrap;margin-top:12px}.sxok{background:var(--bad)!important;border-color:var(--bad)!important;color:#fff!important;font-weight:700;padding-left:22px;padding-right:22px}
+.sxops{max-height:55vh;overflow:auto;margin-top:8px}
+.sxfs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin:6px 0}.sxf{display:flex;flex-direction:column;gap:3px;font-size:12px}
+.sxf input{background:var(--bg);border:1px solid var(--line);color:var(--tx);border-radius:6px;padding:5px 7px}
+#sxCard .sxtool{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px}#sxQ{background:var(--bg);border:1px solid var(--line);color:var(--tx);border-radius:8px;padding:5px 9px;min-width:170px;flex:1 1 170px;max-width:280px}
+#sxList td:nth-child(3){white-space:normal}#sxList th:nth-child(2),#sxList td:nth-child(2),#sxList th:nth-child(3),#sxList td:nth-child(3),.sxops th:nth-child(2),.sxops td:nth-child(2),.sxops th:nth-child(4),.sxops td:nth-child(4){text-align:left}
 #tlF{display:none;position:fixed;inset:0;z-index:300;background:rgba(4,7,11,.94);align-items:center;justify-content:center;padding:16px;overflow:auto}
 #tlF.on{display:flex}
 #tlF .tlfw{width:min(1600px,100%);margin:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px 14px}
@@ -144,6 +157,7 @@ svg text{fill:var(--mut);font-size:10px}
     <div class="pills">
       <span class="pill"><span class="dot" id="dRec"></span><span id="tRec">Recolector…</span></span>
       <span class="pill" id="dnav"><button class="nb" id="dPrev" title="Día anterior">◀</button><input type="date" id="dSel"><button class="nb" id="dNext" title="Día siguiente">▶</button><button class="nb" id="dHoy">Hoy</button></span>
+      <button class="btn" id="hSx" title="Usuarios sospechosos sin revisar">⚠ <span id="hSxN"></span></button>
       <button class="btn" id="bInf">Informe del día</button>
       <span class="pill" id="clock">--:--:--</span>
       <button class="btn" id="bSalir">Salir</button>
@@ -155,6 +169,10 @@ svg text{fill:var(--mut);font-size:10px}
   <div class="grid kpis" id="kpis"></div>
 
   <div class="card" style="margin-bottom:12px"><h2><span id="shT">En turno ahora</span> <span class="sub" id="shSub"></span></h2><div class="shift" id="shift"></div></div>
+
+  <div class="card" id="sxCard" style="margin-bottom:12px"><h2>Usuarios sospechosos <span class="sub" id="sxSub"></span></h2>
+    <div class="sxtool"><span class="tabs"><span class="tab on" data-sxs="pend">Sin revisar</span><span class="tab" data-sxs="all">Todos</span></span><span class="tabs"><span class="tab on" data-sxr="all">Todos los motivos</span><span class="tab" data-sxr="raf">Ráfaga</span><span class="tab" data-sxr="vol">Volumen</span><span class="tab" data-sxr="rep">Repetidos</span></span><input id="sxQ" placeholder="Buscar cliente…"><button class="btn" id="sxBThr">Umbrales</button></div>
+    <div id="sxThr" style="display:none"></div><div class="sub" id="sxRules" style="margin-bottom:6px"></div><div class="sub" id="sxMsg" style="color:var(--ret)"></div><div class="scroll" id="sxList"></div></div>
 
   <div class="grid row3" style="margin-bottom:12px">
     <div class="card"><h2>Actividad por hora (RD) <span class="tabs"><span class="tab on" data-m="n">Cantidad</span><span class="tab" data-m="a">Monto</span><span class="tab" data-m="c">Acumulado</span><span class="zb" id="zIn" title="Acercar">＋</span><span class="zb" id="zOut" title="Alejar">－</span><span class="zb" id="zRst" title="Ver todo el día">Todo</span></span></h2><div id="chart"></div></div>
@@ -201,7 +219,7 @@ let THR=Object.assign({},THR_DEF,JSON.parse(localStorage.getItem('pd_thr')||'{}'
 function start(){
   $('gate').style.display='none';$('app').style.display='block';
   if(location.search.includes('test')){
-    fetch('test-data.json').then(r=>r.json()).then(d=>{hoy=d.hoy;ayer=d.ayer;H7=d.hist||{};if(location.search.includes('past'))sel=d.hoy.dia;evOpen=()=>{EV=d.ev;renderOp()};if(location.search.includes('op='))setTimeout(()=>openOp(decodeURIComponent(location.search.split('op=')[1].split('&')[0])),50);estado={ts:Date.now(),ok:true};if(location.search.includes('informe'))view='informe';render()});
+    fetch('test-data.json').then(r=>r.json()).then(d=>{if(d.sosp){SX=d.sosp;setTimeout(()=>{sxRender();sxCheck()},300)}hoy=d.hoy;ayer=d.ayer;H7=d.hist||{};if(location.search.includes('past'))sel=d.hoy.dia;evOpen=()=>{EV=d.ev;renderOp()};if(location.search.includes('op='))setTimeout(()=>openOp(decodeURIComponent(location.search.split('op=')[1].split('&')[0])),50);estado={ts:Date.now(),ok:true};if(location.search.includes('informe'))view='informe';render()});
   }else{
     const db=firebase.database();let refs=[];
     subscribe=()=>{
@@ -215,7 +233,7 @@ function start(){
     let evRef=null;
     evClose=()=>{if(evRef){evRef.off();evRef=null}};
     evOpen=()=>{evClose();EV=undefined;evRef=db.ref('dashboard/ops/'+viewDate());evRef.on('value',s=>{EV=s.val();renderOp()},denied)};
-    subscribe();
+    subscribe();sxStart(db);
     let cur=rdDate(Date.now());
     setInterval(()=>{if(view==='informe')hist()},10*60000);
     setInterval(()=>{if(rdDate(Date.now())!==cur){const wasToday=!sel;cur=rdDate(Date.now());if(wasToday)subscribe()}},30000);
@@ -231,7 +249,7 @@ function tickClock(){
   const n=new Date();$('clock').textContent=new Intl.DateTimeFormat('es-DO',{timeZone:'America/Santo_Domingo',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(n)+' RD';
   $('fecha').textContent=new Intl.DateTimeFormat('es-DO',{timeZone:'UTC',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date(viewDate()+'T12:00:00Z'))+(isToday()?'':' · día anterior');$('dSel').value=viewDate();$('dSel').max=rdDate(Date.now());$('dNext').disabled=isToday();
   const age=estado?(Date.now()-estado.ts)/1000:1e9,d=$('dRec');
-  if(estado&&estado.ok&&age<120){d.className='dot ok';$('tRec').textContent='Recolector activo · '+ago(estado.ts)+' · web r9 / colector '+(estado.ver||'antiguo')+(estado.bf>0?' · cargando histórico (faltan '+estado.bf+' días)':'')}
+  if(estado&&estado.ok&&age<120){d.className='dot ok';$('tRec').textContent='Recolector activo · '+ago(estado.ts)+' · web r10 / colector '+(estado.ver||'antiguo')+(estado.bf>0?' · cargando histórico (faltan '+estado.bf+' días)':'')}
   else if(estado&&age<120){d.className='dot warn';$('tRec').textContent='Recolector con error'}
   else{d.className='dot bad';$('tRec').textContent=estado?'Sin señal del recolector · '+ago(estado.ts):'Esperando datos…'}
   const re=$('recErr'),msg=estado?[estado.err&&'Error: '+estado.err,estado.bfErr&&'Histórico: '+estado.bfErr].filter(Boolean).join(' · '):'';re.textContent=msg;re.style.display=msg?'block':'none';
@@ -793,8 +811,112 @@ else{
     });
   }
 }
+/* ---------- Usuarios sospechosos ---------- */
+const SX_DEF={rN:5,rGap:2,vN:30,vAmt:300000,rep:10},SX_MIN={rN:4,rGap:3,vN:15,vAmt:150000,rep:6};
+let SX={},SXA={},SXL=JSON.parse(localStorage.getItem('pd_sxack')||'{}'),SXC=Object.assign({},SX_DEF,JSON.parse(localStorage.getItem('pd_sx')||'{}')),sxF={q:'',r:'all',st:'pend'},sxCur=null,sxDb=null,sxQn=0;
+const sxCfg=()=>({rN:Math.max(SX_MIN.rN,+SXC.rN||5),rGap:Math.min(SX_MIN.rGap,Math.max(.25,+SXC.rGap||2)),vN:Math.max(SX_MIN.vN,+SXC.vN||30),vAmt:Math.max(SX_MIN.vAmt,+SXC.vAmt||3e5),rep:Math.max(SX_MIN.rep,+SXC.rep||10)});
+const SXR={raf:['Ráfaga','cb'],vol:['Volumen','cr'],rep:['Importe repetido','cf']};
+const sxWho=e=>/zaholaix/i.test(e||'')?'Zaholaix':/longueira/i.test(e||'')?'David':(e||'?');
+const sxMe=()=>{try{return firebase.auth().currentUser.email}catch(e){return 'prueba'}};
+const sxFecha=d=>new Intl.DateTimeFormat('es-DO',{timeZone:'UTC',weekday:'short',day:'numeric',month:'short'}).format(new Date(d+'T12:00:00Z'));
+function sxEval(dia,k,c,mt){
+  const C=sxCfg(),d=(c.d||[]).slice().sort((a,b)=>a[0]-b[0]),st=dStart(dia),M=i=>mt[i]||'—';
+  if(!d.length)return null;
+  const amt=d.reduce((s,e)=>s+e[1],0),R=[];
+  let best=null,cur=[d[0]],runs=0,inR=0;
+  const close=()=>{if(cur.length>=C.rN){runs++;inR+=cur.length;if(!best||cur.length>best.length)best=cur}};
+  for(let i=1;i<d.length;i++){const e=d[i],q=d[i-1];if(e[2]===q[2]&&e[0]-q[0]<=C.rGap*60)cur.push(e);else{close();cur=[e]}}close();
+  if(best){const g=Math.max(...best.slice(1).map((e,i)=>e[0]-best[i][0]));R.push({id:'raf',t:`${best.length} depósitos seguidos por ${M(best[0][2])} (${hms(st+best[0][0]*1000)}–${hms(st+best[best.length-1][0]*1000)}), máx. ${fT(g)} entre uno y otro`+(runs>1?` · ${runs} ráfagas con ${inR} depósitos en total`:'')})}
+  if(d.length>=C.vN||amt>=C.vAmt)R.push({id:'vol',t:`${num(d.length)} depósitos por ${money(amt)} en el día`});
+  const rc={};d.forEach(e=>rc[e[1]]=(rc[e[1]]||0)+1);const [ra,rn]=Object.entries(rc).sort((a,b)=>b[1]-a[1])[0];
+  if(rn>=C.rep)R.push({id:'rep',t:`${rn} depósitos de exactamente ${money(+ra)}`});
+  if(!R.length)return null;
+  const mc={};d.forEach(e=>mc[M(e[2])]=(mc[M(e[2])]||0)+1);
+  return {dia,k,id:dia+'/'+k,al:c.al||c.u,u:c.u,R,n:d.length,amt,m:Object.entries(mc).sort((a,b)=>b[1]-a[1]).map(x=>x[0]).join(', '),f:st+d[0][0]*1000,l:st+d[d.length-1][0]*1000,c,mt,pn:(c.p||[]).length,pa:(c.p||[]).reduce((s,e)=>s+e[1],0)};
+}
+function sxAll(){const o=[];Object.keys(SX).forEach(dia=>{const v=SX[dia];if(!v||!v.c)return;Object.keys(v.c).forEach(k=>{const a=sxEval(dia,k,v.c[k],v.mt||[]);if(a)o.push(a)})});return o.sort((a,b)=>b.dia.localeCompare(a.dia)||b.R.length-a.R.length||b.n-a.n)}
+const sxAck=a=>{const f=(SXA[a.dia]||{})[a.k],l=SXL[a.id];return f&&l?(f.n>=l.n?f:l):(f||l||null)};
+const sxWorse=(a,k)=>!k||a.R.some(r=>!(k.r||'').split(',').includes(r.id))||a.n>=Math.max(k.n*2,k.n+10);
+function sxBeep(){try{const A=new(window.AudioContext||window.webkitAudioContext)(),o=A.createOscillator(),g=A.createGain(),t=A.currentTime;o.type='sine';o.frequency.setValueAtTime(880,t);o.frequency.setValueAtTime(660,t+.16);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.18,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.42);o.connect(g).connect(A.destination);o.start(t);o.stop(t+.45);setTimeout(()=>A.close(),700)}catch(e){}}
+function sxCheck(){
+  if(sxCur)return;
+  const td=rdDate(Date.now()),q=sxAll().filter(a=>a.dia===td&&sxWorse(a,sxAck(a)));sxQn=q.length;
+  if(q.length)sxShow(q[0]);
+}
+function sxShow(a){
+  sxCur=a;const k=sxAck(a);
+  $('sxAb').innerHTML=`<div class="sxh"><span class="chip cb">⚠ Actividad sospechosa</span>${sxQn>1?`<span class="mut">1 de ${sxQn} pendientes</span>`:''}</div>
+  <div class="sxn">${esc(a.al)} <span class="mut">${esc(a.u||'')}</span></div><div class="mut">${sxFecha(a.dia)} · ${a.m}${k?` · ya visto por ${sxWho(k.by)} con ${k.n} depósitos: ha empeorado`:''}</div>
+  <div class="sxr">${a.R.map(r=>`<div><span class="chip ${SXR[r.id][1]}">${SXR[r.id][0]}</span> ${esc(r.t)}</div>`).join('')}</div>
+  <div class="sxs"><div><span class="mut">Depósitos</span><b class="g">${num(a.n)} · ${money(a.amt)}</b></div><div><span class="mut">Retiros</span><b class="o">${num(a.pn)} · ${money(a.pa)}</b></div><div><span class="mut">Franja</span><b>${hhmm(a.f)}–${hhmm(a.l)}</b></div></div>
+  <div class="sxbt"><button class="btn" id="sxVer">Ver operaciones</button><button class="btn sxok" id="sxOk">Aceptar</button></div>`;
+  $('sxA').classList.add('on');sxBeep();
+}
+function sxAccept(){
+  const a=sxCur;if(!a)return;const v={by:sxMe(),ts:Date.now(),n:a.n,r:a.R.map(r=>r.id).join(',')};
+  SXL[a.id]=v;localStorage.setItem('pd_sxack',JSON.stringify(SXL));
+  if(sxDb)sxDb.ref('dashboard/sospAck/'+a.dia+'/'+a.k).set(v).catch(()=>{$('sxMsg').textContent='No se pudo guardar el "Aceptar" compartido: falta actualizar las reglas de Firebase (ver LEEME).'});
+  $('sxA').classList.remove('on');sxCur=null;sxRender();setTimeout(sxCheck,300);
+}
+function sxDetail(a){
+  const st=dStart(a.dia),mt=a.mt,rows=[].concat((a.c.d||[]).map(e=>({t:e[0],k:0,a:e[1],m:mt[e[2]]})),(a.c.p||[]).map(e=>({t:e[0],k:1,a:e[1],m:mt[e[2]]}))).sort((x,y)=>x.t-y.t);
+  let pd=null;rows.forEach(r=>{if(r.k===0){r.g=pd==null?null:r.t-pd;pd=r.t}});
+  const txt=`${a.al} (${a.u||''}) · ${a.dia}\n${a.R.map(r=>SXR[r.id][0]+': '+r.t).join('\n')}\nDepósitos: ${a.n} · ${money(a.amt)} · Retiros: ${a.pn} · ${money(a.pa)}\n\n`+rows.map(r=>`${hms(st+r.t*1000)}\t${r.k?'Retiro':'Depósito'}\t${money(r.a)}\t${r.m}${r.g!=null?'\t+'+fT(r.g):''}`).join('\n');
+  $('sxDb').innerHTML=`<div class="sxh"><div><div class="sxn">${esc(a.al)} <span class="mut">${esc(a.u||'')}</span></div><div class="mut">${sxFecha(a.dia)} · ${a.m}</div></div><div class="tabs"><button class="btn" id="sxCp">Copiar</button><button class="btn" id="sxX">Cerrar ✕</button></div></div>
+  <div class="sxr">${a.R.map(r=>`<div><span class="chip ${SXR[r.id][1]}">${SXR[r.id][0]}</span> ${esc(r.t)}</div>`).join('')}</div>
+  <div class="sxs"><div><span class="mut">Depósitos</span><b class="g">${num(a.n)} · ${money(a.amt)}</b></div><div><span class="mut">Retiros</span><b class="o">${num(a.pn)} · ${money(a.pa)}</b></div><div><span class="mut">Franja</span><b>${hhmm(a.f)}–${hhmm(a.l)}</b></div></div>
+  <div class="sxops"><table><tr><th>Hora</th><th>Tipo</th><th>Importe</th><th>Método</th><th>Desde el anterior</th></tr>${rows.map(r=>`<tr><td>${hms(st+r.t*1000)}</td><td><span class="chip ${r.k?'cr':'cd'}">${r.k?'Retiro':'Depósito'}</span></td><td class="${r.k?'o':'g'}">${money(r.a)}</td><td>${esc(r.m||'')}</td><td class="mut">${r.g!=null?'+'+fT(r.g):''}</td></tr>`).join('')}</table></div>`;
+  $('sxD').classList.add('on');
+  $('sxCp').onclick=()=>{(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>{$('sxCp').textContent='¡Copiado!';setTimeout(()=>$('sxCp').textContent='Copiar',1500)}).catch(()=>{})};
+  $('sxX').onclick=()=>$('sxD').classList.remove('on');
+}
+let sxRows=[];
+function sxRender(){
+  if(!$('sxList'))return;
+  const all=sxAll(),pend=all.filter(a=>sxWorse(a,sxAck(a)));
+  $('hSx').classList.toggle('on',pend.length>0);$('hSxN').textContent=pend.length+' sospechoso'+(pend.length===1?'':'s');
+  $('sxSub').textContent=all.length?`${all.length} casos · ${pend.length} sin revisar`:'';
+  const q=sxF.q.trim().toLowerCase();
+  sxRows=all.filter(a=>(sxF.st==='all'||sxWorse(a,sxAck(a)))&&(sxF.r==='all'||a.R.some(r=>r.id===sxF.r))&&(!q||(a.al+' '+(a.u||'')).toLowerCase().includes(q))).slice(0,300);
+  document.querySelectorAll('#sxCard [data-sxs]').forEach(t=>t.classList.toggle('on',t.dataset.sxs===sxF.st));
+  document.querySelectorAll('#sxCard [data-sxr]').forEach(t=>t.classList.toggle('on',t.dataset.sxr===sxF.r));
+  $('sxList').innerHTML=sxRows.length?`<table><tr><th>Fecha</th><th>Cliente</th><th>Motivo</th><th>Depósitos</th><th>Franja</th><th>Estado</th></tr>${sxRows.map((a,i)=>{const k=sxAck(a),w=sxWorse(a,k);return `<tr class="clk" data-sxi="${i}"><td>${sxFecha(a.dia)}</td><td><b>${esc(a.al)}</b></td><td style="text-align:left">${a.R.map(r=>`<span class="chip ${SXR[r.id][1]}">${SXR[r.id][0]}</span>`).join(' ')}</td><td><span class="g">${num(a.n)}</span> · ${money(a.amt)}</td><td class="mut">${hhmm(a.f)}–${hhmm(a.l)}</td><td>${w?(k?'<span class="chip cb">Empeoró</span>':'<span class="chip cb">Nueva</span>'):`<span class="mut">Vista · ${sxWho(k.by)} ${new Intl.DateTimeFormat('es-DO',{timeZone:'America/Santo_Domingo',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(k.ts))}</span>`}</td></tr>`}).join('')}</table>`:`<div class="empty">${all.length?'Ningún caso con estos filtros.':'Sin casos sospechosos detectados.'}</div>`;
+  const C=sxCfg();$('sxRules').textContent=`Ráfaga: ${C.rN}+ depósitos seguidos por el mismo método con ≤${C.rGap} min entre ellos · Volumen: ${C.vN}+ depósitos o ${money(C.vAmt)}+ en el día · Importe repetido: ${C.rep}+ depósitos del mismo importe exacto`;
+}
+function sxThrForm(){
+  const C=sxCfg(),f=(id,l,v,mn,st)=>`<label class="sxf"><span class="mut">${l}</span><input type="number" id="${id}" value="${v}" step="${st||1}"><span class="mut">${mn}</span></label>`;
+  $('sxThr').innerHTML=`<div class="sxfs">${f('sx_rN','Ráfaga: nº de depósitos seguidos',C.rN,'mín. 4')}${f('sx_rGap','Ráfaga: minutos máx. entre depósitos',C.rGap,'máx. 3',.25)}${f('sx_vN','Volumen: nº de depósitos en el día',C.vN,'mín. 15')}${f('sx_vAmt','Volumen: importe del día (RD$)',C.vAmt,'mín. 150.000',1000)}${f('sx_rep','Repetidos: nº del mismo importe',C.rep,'mín. 6')}</div><div class="sxbt"><button class="btn" id="sxSave">Guardar (para los dos)</button><button class="btn" id="sxDef">Valores iniciales</button><span class="mut" id="sxTm"></span></div>`;
+}
+function sxSave(v){
+  SXC=Object.assign({},SX_DEF,v);localStorage.setItem('pd_sx',JSON.stringify(SXC));sxRender();
+  if(sxDb)sxDb.ref('dashboard/sospCfg').set(SXC).then(()=>{$('sxTm').textContent='Guardado.'}).catch(()=>{$('sxTm').textContent='Guardado solo en este navegador: faltan las reglas nuevas de Firebase.'});else $('sxTm').textContent='Guardado.';
+}
+document.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.closest('#sxOk'))return sxAccept();
+  if(t.closest('#sxVer')&&sxCur)return sxDetail(sxCur);
+  if(t===$('sxD'))return $('sxD').classList.remove('on');
+  const r=t.closest('[data-sxi]');if(r)return sxDetail(sxRows[+r.dataset.sxi]);
+  const s=t.closest('[data-sxs]');if(s){sxF.st=s.dataset.sxs;return sxRender()}
+  const f=t.closest('[data-sxr]');if(f){sxF.r=f.dataset.sxr;return sxRender()}
+  if(t.closest('#sxBThr')){const b=$('sxThr');if(b.style.display==='none'){sxThrForm();b.style.display='block'}else b.style.display='none';return}
+  if(t.closest('#sxSave')){const g=id=>+$(id).value;return sxSave({rN:g('sx_rN'),rGap:g('sx_rGap'),vN:g('sx_vN'),vAmt:g('sx_vAmt'),rep:g('sx_rep')})}
+  if(t.closest('#sxDef')){sxSave(SX_DEF);return sxThrForm()}
+  if(t.closest('#hSx')){$('sxCard').scrollIntoView({behavior:'smooth'})}
+});
+document.addEventListener('input',e=>{if(e.target.id==='sxQ'){sxF.q=e.target.value;sxRender()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('sxD').classList.contains('on')){$('sxD').classList.remove('on');e.stopImmediatePropagation()}},true);
+setInterval(()=>{sxRender();sxCheck()},60000);
+function sxStart(db){
+  sxDb=db;
+  db.ref('dashboard/sosp').orderByKey().limitToLast(60).on('value',s=>{SX=s.val()||{};sxRender();sxCheck()},()=>{});
+  db.ref('dashboard/sospAck').on('value',s=>{SXA=s.val()||{};sxRender();sxCheck()},()=>{});
+  db.ref('dashboard/sospCfg').on('value',s=>{const v=s.val();if(v){SXC=Object.assign({},SX_DEF,v);localStorage.setItem('pd_sx',JSON.stringify(SXC))}sxRender()},()=>{});
+}
 })();
 </script>
 <div id="tlF"><div class="tlfw"><div class="tlfh"><div><b id="tlFn"></b> <span class="mut" id="tlFsub"></span></div><div class="tabs"><span class="zb" id="fzIn" title="Acercar">＋</span><span class="zb" id="fzOut" title="Alejar">－</span><span class="zb" id="fzRst" title="Ver el turno completo">Todo</span><span class="zb" id="fzX">✕ Cerrar</span></div></div><div id="tlFb"></div></div></div>
+<div id="sxA" class="ov"><div class="ovb" id="sxAb"></div></div>
+<div id="sxD" class="ov"><div class="ovb" id="sxDb"></div></div>
 </body>
 </html>
